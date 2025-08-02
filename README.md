@@ -1,6 +1,6 @@
 ## 🔗 Project Repository
 
-[E-Bus Student Monitoring System 🚍](https://github.com/akhil/e-bus-monitoring-system)
+[E-Bus Student Monitoring System 🚍](https://github.com/Akhiljoji145/E-Bus-Student-Montoring-System/)
 
 > A smart transportation system for managing and monitoring student travel using college buses with QR integration, real-time alerts, and role-based access.
 
