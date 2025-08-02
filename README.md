@@ -1,4 +1,11 @@
-<img width="2458" height="515" alt="image" src="https://github.com/user-attachments/assets/2be45b4a-7bd9-409e-bb4c-6bfcaa5e7d4a" /><img width="2129" height="375" alt="image" src="https://github.com/user-attachments/assets/668bcf44-c924-404d-8a79-16769a99bbd1" /># 🚌 E-Bus Student Monitoring System
+## 🔗 Project Repository
+
+[E-Bus Student Monitoring System 🚍](https://github.com/your-username/e-bus-monitoring-system)
+
+> A smart transportation system for managing and monitoring student travel using college buses with QR integration, real-time alerts, and role-based access.
+
+
+# 🚌 E-Bus Student Monitoring System
 
 📌 Overview
 The 'E-Bus Student Monitoring System' is a smart transportation solution designed to ensure the safe and efficient transit of students using college buses. It integrates real-time monitoring, student check-in/check-out via QR code, and communication tools for parents, students, drivers, and management.
