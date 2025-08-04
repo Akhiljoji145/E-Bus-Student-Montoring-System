@@ -1,4 +1,5 @@
-On Development Stage
+🚧 On Development Stage
+This project is currently under active development. 
 
 ## 🔗 Project Repository
 
