@@ -1,4 +1,10 @@
+🚧 On Development Stage
+
+This project is currently under active development. 
+
 ## 🔗 Project Repository
+
+![Alt text](banner.png)
 
 [E-Bus Student Monitoring System 🚍](https://github.com/Akhiljoji145/E-Bus-Student-Montoring-System/tree/main)
 
