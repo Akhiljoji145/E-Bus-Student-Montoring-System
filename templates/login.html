@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - School Bus Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+    <!-- Login Section -->
+    <div class="min-h-screen flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full">
+            <div class="bg-white rounded-lg shadow-xl p-8">
+                <div class="text-center mb-8">
+                    <button onclick="window.location.href='index.html'" class="text-indigo-600 hover:text-indigo-700 mb-4 inline-flex items-center">
+                        ← Back to Home
+                    </button>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">System Login</h2>
+                    <p class="text-gray-600">Choose your role and sign in</p>
+                </div>
+                
+                <!-- Role Selection -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button onclick="selectRole('admin', this)" class="role-btn p-3 border-2 border-gray-200 rounded-lg hover:border-indigo-500 transition-colors">
+                        <div class="text-xl mb-1">👨‍💼</div>
+                        <div class="text-sm font-medium">Admin</div>
+                    </button>
+                    <button onclick="selectRole('management', this)" class="role-btn p-3 border-2 border-gray-200 rounded-lg hover:border-indigo-500 transition-colors">
+                        <div class="text-xl mb-1">🚌</div>
+                        <div class="text-sm font-medium">Management</div>
+                    </button>
+                    <button onclick="selectRole('teacher', this)" class="role-btn p-3 border-2 border-gray-200 rounded-lg hover:border-indigo-500 transition-colors">
+                        <div class="text-xl mb-1">👩‍🏫</div>
+                        <div class="text-sm font-medium">Teacher</div>
+                    </button>
+                    <button onclick="selectRole('parent', this)" class="role-btn p-3 border-2 border-gray-200 rounded-lg hover:border-indigo-500 transition-colors">
+                        <div class="text-xl mb-1">👨‍👩‍👧‍👦</div>
+                        <div class="text-sm font-medium">Parent</div>
+                    </button>
+                    <button onclick="selectRole('driver', this)" class="role-btn p-3 border-2 border-gray-200 rounded-lg hover:border-indigo-500 transition-colors">
+                        <div class="text-xl mb-1">🚗</div>
+                        <div class="text-sm font-medium">Driver</div>
+                    </button>
+                    <button onclick="selectRole('student', this)" class="role-btn p-3 border-2 border-gray-200 rounded-lg hover:border-indigo-500 transition-colors">
+                        <div class="text-xl mb-1">🎓</div>
+                        <div class="text-sm font-medium">Student</div>
+                    </button>
+                </div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="loginEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="loginPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors font-medium">
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Demo Credentials -->
+                <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h4 class="font-medium text-gray-900 mb-2">Demo Credentials:</h4>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <div><strong>Admin:</strong> admin@gmail.com / admin</div>
+                        <div><strong>Management:</strong> management@gmail.com / management</div>
+                        <div><strong>Teacher:</strong> teacher@gmail.com / teacher</div>
+                        <div><strong>Parent:</strong> parent@gmail.com / parent</div>
+                        <div><strong>Driver:</strong> driver@gmail.com / driver</div>
+                        <div><strong>Student:</strong> student@gmail.com / student</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'common_scripts.js' %}"></script>
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const validCredentials = {
+                'admin@gmail.com': { password: 'admin', role: 'admin', page: '{% url "admin_main:dashboard" %}' },
+                'management@gmail.com': { password: 'management', role: 'management', page: '{% url "management:dashboard" %}' },
+                'teacher@gmail.com': { password: 'teacher', role: 'teacher', page: '{% url "teacher:dashboard" %}' },
+                'parent@gmail.com': { password: 'parent', role: 'parent', page: '{% url "parent:dashboard" %}' },
+                'driver@gmail.com': { password: 'driver', role: 'driver', page: '{% url "driver:dashboard" %}' },
+                'student@gmail.com': { password: 'student', role: 'student', page: '{% url "student:dashboard" %}' }
+            };
+            
+            if (validCredentials[email] && validCredentials[email].password === password) {
+                localStorage.setItem('currentUser Role', validCredentials[email].role);
+                window.location.href = validCredentials[email].page;
+            } else {
+                alert('Invalid credentials! Please use the demo credentials provided.');
+            }
+        }
+    </script>
+</body>
+</html>

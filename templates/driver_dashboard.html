@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Dashboard - BusTracker Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'common_scripts.js' %}"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+    <nav class="bg-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors"><a href="">Home</a></button>
+                        <button id="logoutBtn" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors"><a href="{% url 'student:logout' %}">Logout</a></button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+    <div id="driver-section" class="section active">
+        <div class="max-w-7xl mx-auto py-8 px-4">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Driver Dashboard</h1>
+                <p class="text-gray-600">Bus operations and student management</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Student Boarding Notifications -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <h3 class="text-xl font-semibold">🔔 Student Boarding Alerts</h3>
+                        <div class="notification-badge ml-2">2</div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <h4 class="font-medium text-red-800 mb-2">Alex Rodriguez - Not Boarded</h4>
+                            <p class="text-sm text-red-700 mb-3">Expected at Stop #3 - Pine Street</p>
+                            <div class="flex gap-2">
+                                <button onclick="confirmDriverStudentStatus('Alex Rodriguez', 'boarded')" class="text-xs bg-green-600 text-white px-3 py-1 rounded">Confirm Boarded</button>
+                                <button onclick="confirmDriverStudentStatus('Alex Rodriguez', 'absent')" class="text-xs bg-red-600 text-white px-3 py-1 rounded">Mark Absent</button>
+                                <button onclick="callStudent('Alex Rodriguez')" class="text-xs bg-blue-600 text-white px-3 py-1 rounded">📞 Call</button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-yellow-800">Lisa Wang - Waiting</h4>
+                                <p class="text-sm text-yellow-700 mb-3">At Stop #5 - Oak Avenue</p>
+                            <div class="flex gap-2">
+                                <button onclick="confirmDriverStudentStatus('Lisa Wang', 'boarded')" class="text-xs bg-green-600 text-white px-3 py-1 rounded">Confirm Boarded</button>
+                                <button onclick="confirmDriverStudentStatus('Lisa Wang', 'missed')" class="text-xs bg-orange-600 text-white px-3 py-1 rounded">Missed Bus</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Validation & Messages -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">👥 Student Management</h3>
+                    
+                    <!-- Student Validation -->
+                    <div class="mb-6">
+                        <h4 class="font-medium mb-3">Student Fee Validation</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                <div>
+                                    <span class="font-medium">Emma Davis</span>
+                                    <span class="text-sm text-gray-600 ml-2">Grade 5A</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="validateStudent('Emma Davis', 'valid')" class="text-xs bg-green-600 text-white px-2 py-1 rounded">Valid</button>
+                                    <button onclick="validateStudent('Emma Davis', 'invalid')" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Invalid</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                <div>
+                                    <span class="font-medium">Mike Chen</span>
+                                    <span class="text-sm text-gray-600 ml-2">Grade 4B</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="validateStudent('Mike Chen', 'valid')" class="text-xs bg-green-600 text-white px-2 py-1 rounded">Valid</button>
+                                    <button onclick="validateStudent('Mike Chen', 'invalid')" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Invalid</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Send Messages -->
+                    <div>
+                        <h4 class="font-medium mb-3">Send Bus Alerts</h4>
+                        <form onsubmit="sendBusMessage(event)" class="space-y-3">
+                            <div>
+                                <select id="messageType" class="w-full p-2 border rounded-md">
+                                    <option>Select Message Type...</option>
+                                    <option>Bus Breakdown - Alternative Arranged</option>
+                                    <option>Route Change</option>
+                                    <option>Delay Notification</option>
+                                    <option>Emergency Alert</option>
+                                </select>
+                            </div>
+                            <div>
+                                <textarea id="messageContent" placeholder="Enter message details..." class="w-full p-2 border rounded-md h-16 resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                                📢 Send to All Students
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arrival Confirmation -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-semibold mb-4">🏫 Arrival Management</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-medium mb-3">Pre-Departure Check</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <span class="text-sm">Emma Davis</span>
+                                <button onclick="checkStudent('Emma Davis', 'present')" class="text-xs bg-green-600 text-white px-2 py-1 rounded">✅ Present</button>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <span class="text-sm">Alex Rodriguez</span>
+                                <button onclick="checkStudent('Alex Rodriguez', 'present')" class="text-xs bg-green-600 text-white px-2 py-1 rounded">✅ Present</button>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <span class="text-sm">Mike Chen</span>
+                                <button onclick="checkStudent('Mike Chen', 'present')" class="text-xs bg-green-600 text-white px-2 py-1 rounded">✅ Present</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium mb-3">Arrival Confirmation</h4>
+                        <div class="space-y-3">
+                            <button onclick="confirmArrival('school')" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+                                🏫 Confirm School Arrival
+                            </button>
+                            <button onclick="confirmArrival('route-complete')" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                                🔄 Route Complete
+                            </button>
+                            <div class="text-xs text-gray-500 mt-2">
+                                Click after all students have safely disembarked
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Driver Functions
+        function confirmDriverStudentStatus(student, status) {
+            let message = '';
+            switch(status) {
+                case 'boarded':
+                    message = `✅ ${student} BOARDED SUCCESSFULLY\nTime: ${new Date().toLocaleTimeString()}\nNotifications sent to parent and school.`;
+                    break;
+                case 'absent':
+                    message = `❌ ${student} MARKED ABSENT\nReason: Not at pickup point\nParent notification sent automatically.`;
+                    break;
+                case 'missed':
+                    message = `⏰ ${student} MISSED BUS\nBus waited 2 minutes\nAlternative transport notification sent to parent.`;
+                    break;
+            }
+            alert(message);
+        }
+
+        function callStudent(student) {
+            alert(`📞 Calling ${student}...\n\nDialing student mobile: +1-555-0456\n\nThis would initiate a call to the student's registered phone number to confirm their location and boarding status.`);
+        }
+
+        function validateStudent(student, status) {
+            const statusText = status === 'valid' ? 'VALID ✅ (Fee Paid)' : 'INVALID ❌ (Fee Pending)';
+            alert(`${student} marked as ${statusText}\n\nFee Status Updated\nAccess Level: ${status === 'valid' ? 'Full Bus Services' : 'Restricted - Payment Required'}`);
+        }
+
+        function sendBusMessage(event) {
+            event.preventDefault();
+            const type = document.getElementById('messageType').value;
+            const content = document.getElementById('messageContent').value;
+            
+            if (type === 'Select Message Type...' || !content) {
+                alert('Please fill in all fields!');
+                return;
+            }
+            
+            alert(`📢 BROADCAST MESSAGE SENT\n\nType: ${type}\nMessage: ${content}\n\nSent to:\n- All students on this route\n- Parents\n- School administration\n\nDelivery Status: Successful\nTime: ${new Date().toLocaleTimeString()}`);
+            
+            // Clear form
+            document.getElementById('messageType').value = 'Select Message Type...';
+            document.getElementById('messageContent').value = '';
+        }
+
+        function checkStudent(student, status) {
+            alert(`✅ PRE-DEPARTURE CHECK\n\n${student}: ${status.toUpperCase()}\nSeat Assignment: Confirmed\nSafety Check: Complete`);
+        }
+
+        function confirmArrival(type) {
+            let message = '';
+            if (type === 'school') {
+                message = '🏫 SCHOOL ARRIVAL CONFIRMED\n\nAll students safely delivered\nTime: ' + new Date().toLocaleTimeString() + '\nNotifications sent to all parents';
+            } else {
+                message = '🔄 ROUTE COMPLETED\n\nAll stops covered\nAll students accounted for\nBus returning to depot\nRoute summary sent to management';
+            }
+            alert(message);
+        }
+    </script>
+</body>
+</html>

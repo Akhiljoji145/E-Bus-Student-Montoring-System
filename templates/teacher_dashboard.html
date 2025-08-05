@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Dashboard - BusTracker Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="common_scripts.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+    <script>loadDashboardNav();</script>
+
+    <div id="management-section" class="section active">
+        <div class="max-w-7xl mx-auto py-8 px-4">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Bus Management Dashboard</h1>
+                <p class="text-gray-600">Monitor bus operations and student communications</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Send Student Credentials -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">📧 Send Bus Student Credentials</h3>
+                    <form onsubmit="sendBusCredentials(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Student Email</label>
+                            <input type="email" id="busStudentEmail" required class="w-full p-2 border rounded-md" placeholder="student@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Student Name</label>
+                            <input type="text" id="busStudentName" required class="w-full p-2 border rounded-md" placeholder="Student Name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Bus Route</label>
+                            <select id="busRoute" class="w-full p-2 border rounded-md">
+                                <option>Route A - Downtown</option>
+                                <option>Route B - Suburbs</option>
+                                <option>Route C - North District</option>
+                                <option>Route D - East Side</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="busPassword" readonly class="flex-1 p-2 border rounded-md bg-gray-50" placeholder="Generated password">
+                            <button type="button" onclick="generateBusPassword()" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Generate</button>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                            📧 Send Bus Credentials
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Bus Complaints Dashboard -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">🚌 Bus Complaints & Monitoring</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-red-800">Bus #3 - Overcrowding</h4>
+                                <span class="text-xs text-red-600">2 min ago</span>
+                            </div>
+                            <p class="text-sm text-red-700">Too many students on morning route</p>
+                            <p class="text-xs text-gray-600">Reporter: Student Alex R.</p>
+                            <button onclick="viewComplaintDetails('Bus #3 overcrowding issue')" class="mt-2 text-xs bg-red-600 text-white px-3 py-1 rounded">View Details</button>
+                        </div>
+                        
+                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-yellow-800">Bus #7 - Late Arrival</h4>
+                                <span class="text-xs text-yellow-600">15 min ago</span>
+                            </div>
+                            <p class="text-sm text-yellow-700">Consistent delays on Route B</p>
+                            <p class="text-xs text-gray-600">Reporter: Parent (Mike's Dad)</p>
+                            <button onclick="viewComplaintDetails('Bus #7 late arrival issue')" class="mt-2 text-xs bg-yellow-600 text-white px-3 py-1 rounded">View Details</button>
+                        </div>
+
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-blue-800">Bus #12 - Maintenance</h4>
+                                <span class="text-xs text-blue-600">1 hour ago</span>
+                            </div>
+                            <p class="text-sm text-blue-700">AC not working properly</p>
+                            <p class="text-xs text-gray-600">Reporter: Driver Tom B.</p>
+                            <button onclick="viewComplaintDetails('Bus #12 maintenance issue')" class="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded">View Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Management Functions
+        function generateBusPassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let password = '';
+            for (let i = 0; i < 8; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('busPassword').value = password;
+        }
+
+        function sendBusCredentials(event) {
+            event.preventDefault();
+            const email = document.getElementById('busStudentEmail').value;
+            const name = document.getElementById('busStudentName').value;
+            const route = document.getElementById('busRoute').value;
+            const password = document.getElementById('busPassword').value;
+            
+            if (!password) {
+                alert('Please generate a password first!');
+                return;
+            }
+            
+            alert(`Bus credentials sent to ${name} (${email})\nRoute: ${route}\nPassword: ${password}\n\nEmail Content:\n"Dear ${name}, your bus login credentials are ready. Use email: ${email} and password: ${password} to access the bus tracking system."`);
+            
+            // Clear form
+            document.getElementById('busStudentEmail').value = '';
+            document.getElementById('busStudentName').value = '';
+            document.getElementById('busPassword').value = '';
+        }
+
+        function viewComplaintDetails(complaint) {
+            alert(`📋 COMPLAINT DETAILS:\n\n${complaint}\n\nFull Report:\n- Time: Morning Route\n- Witnesses: 3 students\n- Driver Response: Acknowledged\n- Action Required: Route optimization\n- Status: Under Investigation\n- Status: Under Investigation\n\nThis would open a detailed management interface with photos, witness statements, and resolution tracking.`);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete School Bus Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .section { display: none; }
+        .section.active { display: block; }
+        .hero-animation { animation: fadeInUp 1s ease-out; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .feature-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .pulse-animation { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+    <!-- Cover Page Section -->
+    <div id="cover-section" class="section active">
+        <!-- Header -->
+        <nav class="bg-white/80 backdrop-blur-sm shadow-lg fixed w-full top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
+                    </div>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                        <a href="{% url 'student:login' %}">Get Started</a>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <div class="pt-20 min-h-screen flex items-center">
+            <div class="max-w-7xl mx-auto px-4 py-16">
+                <div class="text-center hero-animation">
+                    <div class="mb-8">
+                        <div class="text-8xl mb-4 pulse-animation">🚌</div>
+                        <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                            School Bus Management
+                            <span class="text-indigo-600 block">Made Simple</span>
+                        </h1>
+                        <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                            Complete solution for tracking, managing, and coordinating school transportation. 
+                            Safe, efficient, and connected for everyone involved.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button onclick="showSection('login')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-medium transition-colors shadow-lg">
+                                Access System
+                            </button>
+                            <button onclick="scrollToFeatures()" class="bg-white hover:bg-gray-50 text-indigo-600 px-8 py-4 rounded-lg text-lg font-medium transition-colors shadow-lg border border-indigo-200">
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div id="features" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">Everything You Need</h2>
+                    <p class="text-xl text-gray-600">Comprehensive tools for all stakeholders</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="feature-card bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl">
+                        <div class="text-4xl mb-4">👨‍💼</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Admin Control</h3>
+                        <p class="text-gray-600">Complete system oversight and management capabilities</p>
+                    </div>
+                    
+                    <div class="feature-card bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl">
+                        <div class="text-4xl mb-4">🚌</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Fleet Management</h3>
+                        <p class="text-gray-600">Real-time tracking and route optimization</p>
+                    </div>
+                    
+                    <div class="feature-card bg-gradient-to-br from-purple-50 to-violet-50 p-6 rounded-xl">
+                        <div class="text-4xl mb-4">👩‍🏫</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Teacher Portal</h3>
+                        <p class="text-gray-600">Student attendance and safety monitoring</p>
+                    </div>
+                    
+                    <div class="feature-card bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl">
+                        <div class="text-4xl mb-4">👨‍👩‍👧‍👦</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Parent Access</h3>
+                        <p class="text-gray-600">Live updates and communication tools</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="py-20 bg-indigo-600">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="grid md:grid-cols-3 gap-8 text-center text-white">
+                    <div>
+                        <div class="text-4xl font-bold mb-2">99.9%</div>
+                        <div class="text-indigo-200">System Uptime</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold mb-2">24/7</div>
+                        <div class="text-indigo-200">Real-time Tracking</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold mb-2">100%</div>
+                        <div class="text-indigo-200">Safety Focused</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="py-20 bg-gray-50">
+            <div class="max-w-4xl mx-auto text-center px-4">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
+                <p class="text-xl text-gray-600 mb-8">Join thousands of schools already using BusTracker Pro</p>
+                <button onclick="showSection('login')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-medium transition-colors shadow-lg">
+                    Access Your Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'common_scripts.js' %}"></script>
+    <script>
+        function scrollToFeatures() {
+            document.getElementById('features').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('cover'); // Start with the cover page
+        });
+    </script>
+</body>
+</html>

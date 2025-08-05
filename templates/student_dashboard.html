@@ -1,0 +1,311 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - BusTracker Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{% static 'common_scripts.js' %}"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+    <script>loadDashboardNav();</script>
+
+    <div id="student-section" class="section active">
+        <div class="max-w-4xl mx-auto py-8 px-4">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Student Dashboard</h1>
+                <p class="text-gray-600">Bus services, complaints, and hostel registration</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Bus Complaints & Polling -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">📝 Bus Complaints & Feedback</h3>
+                    
+                    <!-- Quick Poll -->
+                    <div class="mb-6">
+                        <h4 class="font-medium mb-3">Quick Poll: How was your bus ride today?</h4>
+                        <div class="space-y-2">
+                            <div class="poll-option p-3 border rounded-lg cursor-pointer" onclick="submitPoll('excellent')">
+                                <div class="flex items-center">
+                                    <span class="text-green-600 mr-3">😊</span>
+                                    <span>Excellent - No issues</span>
+                                </div>
+                            </div>
+                            <div class="poll-option p-3 border rounded-lg cursor-pointer" onclick="submitPoll('good')">
+                                <div class="flex items-center">
+                                    <span class="text-blue-600 mr-3">🙂</span>
+                                    <span>Good - Minor delays</span>
+                                </div>
+                            </div>
+                            <div class="poll-option p-3 border rounded-lg cursor-pointer" onclick="submitPoll('poor')">
+                                <div class="flex items-center">
+                                    <span class="text-yellow-600 mr-3">😐</span>
+                                    <span>Poor - Some problems</span>
+                                </div>
+                            </div>
+                            <div class="poll-option p-3 border rounded-lg cursor-pointer" onclick="submitPoll('bad')">
+                                <div class="flex items-center">
+                                    <span class="text-red-600 mr-3">😞</span>
+                                    <span>Bad - Major issues</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Complaint -->
+                    <div>
+                        <h4 class="font-medium mb-3">Submit Detailed Complaint</h4>
+                        <form onsubmit="submitStudentComplaint(event)" class="space-y-3">
+                            <div>
+                                <select id="studentComplaintType" class="w-full p-2 border rounded-md">
+                                    <option>Select Issue...</option>
+                                    <option>Overcrowding</option>
+                                    <option>Late Pickup</option>
+                                    <option>Rude Driver</option>
+                                    <option>Bus Condition</option>
+                                    <option>Safety Issue</option>
+                                    <option>Bullying</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <textarea id="studentComplaintDetails" placeholder="Describe the issue..." class="w-full p-2 border rounded-md h-20 resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">
+                                📤 Submit Complaint
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Hostel Bus Registration -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">🏠 Hostel Bus Registration</h3>
+                    
+                    <!-- Bus Selection for Hostelers -->
+                    <div class="mb-6">
+                        <h4 class="font-medium mb-3">Select Bus for Hostel Students</h4>
+                        <form onsubmit="selectHostelBus(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Available Buses</label>
+                                <select id="hostelBusSelect" class="w-full p-2 border rounded-md">
+                                    <option>Select Bus...</option>
+                                    <option>Bus #1 - City Center Route</option>
+                                    <option>Bus #4 - Mall Route</option>
+                                    <option>Bus #8 - Station Route</option>
+                                    <option>Bus #11 - Airport Route</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Destination</label>
+                                <input type="text" id="hostelDestination" placeholder="Enter your destination" class="w-full p-2 border rounded-md">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Departure Time</label>
+                                <select id="hostelTime" class="w-full p-2 border rounded-md">
+                                    <option>Select Time...</option>
+                                    <option>6:00 PM</option>
+                                    <option>7:00 PM</option>
+                                    <option>8:00 PM</option>
+                                    <option>9:00 PM</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+                                🚌 Request Bus & Driver Confirmation
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Confirmation Status -->
+                    <div id="busConfirmationStatus" class="hidden">
+                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <h4 class="font-medium text-yellow-800 mb-2">⏳ Awaiting Driver Confirmation</h4>
+                            <p class="text-sm text-yellow-700">Your bus request has been sent to the driver. You'll receive confirmation shortly.</p>
+                            <button onclick="checkConfirmationStatus()" class="mt-2 text-xs bg-yellow-600 text-white px-3 py-1 rounded">Check Status</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AN/FN Registration -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-semibold mb-4">📋 AN/FN Registration</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-medium mb-3">Morning Session (AN) Registration</h4>
+                        <form onsubmit="registerSession(event, 'AN')" class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Student Name</label>
+                                <input type="text" id="anStudentName" placeholder="Your full name" class="w-full p-2 border rounded-md">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Student ID</label>
+                                <input type="text" id="anStudentId" placeholder="Your student ID" class="w-full p-2 border rounded-md">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Bus Route</label>
+                                <select id="anBusRoute" class="w-full p-2 border rounded-md">
+                                    <option>Select Route...</option>
+                                    <option>Route A - Downtown</option>
+                                    <option>Route B - Suburbs</option>
+                                    <option>Route C - North District</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                                📝 Register for AN
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-medium mb-3">Afternoon Session (FN) Registration</h4>
+                        <form onsubmit="registerSession(event, 'FN')" class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Student Name</label>
+                                <input type="text" id="fnStudentName" placeholder="Your full name" class="w-full p-2 border rounded-md">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Student ID</label>
+                                <input type="text" id="fnStudentId" placeholder="Your student ID" class="w-full p-2 border rounded-md">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Bus Route</label>
+                                <select id="fnBusRoute" class="w-full p-2 border rounded-md">
+                                    <option>Select Route...</option>
+                                    <option>Route A - Downtown</option>
+                                    <option>Route B - Suburbs</option>
+                                    <option>Route C - North District</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700">
+                                📝 Register for FN
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Registration History -->
+                <div class="mt-6">
+                    <h4 class="font-medium mb-3">Your Registrations</h4>
+                    <div id="registrationHistory" class="space-y-2">
+                        <div class="p-3 bg-gray-50 rounded border-l-4 border-blue-400">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-medium">AN Session - Route A</span>
+                                <span class="text-xs text-blue-600">Active</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">Registered on March 15, 2024</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Student Functions
+        function submitPoll(rating) {
+            const ratings = {
+                excellent: '😊 Excellent',
+                good: '🙂 Good', 
+                poor: '😐 Poor',
+                bad: '😞 Bad'
+            };
+            alert(`📊 POLL SUBMITTED\n\nYour Rating: ${ratings[rating]}\n\nThank you for your feedback!\nYour response helps us improve bus services.\n\nDaily poll results are shared with management for service improvements.`);
+        }
+
+        function submitStudentComplaint(event) {
+            event.preventDefault();
+            const type = document.getElementById('studentComplaintType').value;
+            const details = document.getElementById('studentComplaintDetails').value;
+            
+            if (type === 'Select Issue...' || !details) {
+                alert('Please fill in all fields!');
+                return;
+            }
+            
+            alert(`📤 STUDENT COMPLAINT SUBMITTED\n\nIssue: ${type}\nDetails: ${details}\nComplaint ID: #STU${Math.floor(Math.random() * 1000)}\n\nYour complaint has been forwarded to:\n- Bus Management\n- School Administration\n- Student Affairs Office\n\nYou'll receive updates on the resolution progress.`);
+            
+            // Clear form
+            document.getElementById('studentComplaintType').value = 'Select Issue...';
+            document.getElementById('studentComplaintDetails').value = '';
+        }
+
+        function selectHostelBus(event) {
+            event.preventDefault();
+            const bus = document.getElementById('hostelBusSelect').value;
+            const destination = document.getElementById('hostelDestination').value;
+            const time = document.getElementById('hostelTime').value;
+            
+            if (bus === 'Select Bus...' || !destination || time === 'Select Time...') {
+                alert('Please fill in all fields!');
+                return;
+            }
+            
+            // Show confirmation status
+            document.getElementById('busConfirmationStatus').classList.remove('hidden');
+            
+            alert(`🚌 HOSTEL BUS REQUEST SUBMITTED\n\nBus: ${bus}\nDestination: ${destination}\nTime: ${time}\n\nRequest sent to driver for confirmation.\nYou'll receive SMS/email notification once confirmed.\n\nRequest ID: #HST${Math.floor(Math.random() * 1000)}`);
+            
+            // Clear form
+            document.getElementById('hostelBusSelect').value = 'Select Bus...';
+            document.getElementById('hostelDestination').value = '';
+            document.getElementById('hostelTime').value = 'Select Time...';
+        }
+
+        function checkConfirmationStatus() {
+            // Simulate random confirmation
+            const confirmed = Math.random() > 0.5;
+            if (confirmed) {
+                document.getElementById('busConfirmationStatus').innerHTML = `
+                    <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <h4 class="font-medium text-green-800 mb-2">✅ CONFIRMED by Driver</h4>
+                        <p class="text-sm text-green-700">Your bus request has been approved! Please be at the pickup point 5 minutes early.</p>
+                        <p class="text-xs text-green-600 mt-1">Driver: John Smith | Contact: +1-555-0789</p>
+                    </div>
+                `;
+            } else {
+                alert('⏳ Still awaiting driver confirmation. Please check again in a few minutes.');
+            }
+        }
+
+        function registerSession(event, session) {
+            event.preventDefault();
+            const nameField = session === 'AN' ? 'anStudentName' : 'fnStudentName';
+            const idField = session === 'AN' ? 'anStudentId' : 'fnStudentId';
+            const routeField = session === 'AN' ? 'anBusRoute' : 'fnBusRoute';
+            
+            const name = document.getElementById(nameField).value;
+            const id = document.getElementById(idField).value;
+            const route = document.getElementById(routeField).value;
+            
+            if (!name || !id || route === 'Select Route...') {
+                alert('Please fill in all fields!');
+                return;
+            }
+            
+            // Add to registration history
+            const historyDiv = document.getElementById('registrationHistory');
+            const newRegistration = document.createElement('div');
+            newRegistration.className = `p-3 bg-gray-50 rounded border-l-4 ${session === 'AN' ? 'border-blue-400' : 'border-purple-400'}`;
+            newRegistration.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">${session} Session - ${route}</span>
+                    <span class="text-xs ${session === 'AN' ? 'text-blue-600' : 'text-purple-600'}">Active</span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">Registered just now</p>
+            `;
+            historyDiv.insertBefore(newRegistration, historyDiv.firstChild);
+            
+            alert(`📝 ${session} SESSION REGISTRATION SUCCESSFUL\n\nStudent: ${name}\nID: ${id}\nRoute: ${route}\nSession: ${session === 'AN' ? 'Morning (AN)' : 'Afternoon (FN)'}\n\nRegistration ID: #${session}${Math.floor(Math.random() * 1000)}\n\nYou can now access bus services for this session.\nBus timings and route details will be sent to your email.`);
+            
+            // Clear form
+            document.getElementById(nameField).value = '';
+            document.getElementById(idField).value = '';
+            document.getElementById(routeField).value = 'Select Route...';
+        }
+    </script>
+</body>
+</html>
