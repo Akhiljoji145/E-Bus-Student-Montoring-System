@@ -37,10 +37,7 @@ function showSection(sectionName) {
 }
 
 // Logout function (used by all dashboards)
-function logout() {
-    localStorage.removeItem('currentUserRole'); // Clear stored role
-    window.location.href = '{% url "student:logout" %}'; // Redirect to login page
-}
+
 
 // Function to load common navigation for dashboards
 function loadDashboardNav() {

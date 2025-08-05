@@ -6,7 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Management Dashboard - BusTracker Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="common_scripts.js"></script>
+    <script src="{% static 'common_scripts.js' %}"></script>
+    <script>
+    function logout() {
+    localStorage.removeItem('currentUserRole'); // Clear stored role
+    window.location.href = '{% url "teacher:logout" %}'; // Redirect to login page
+    }
+    </script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 

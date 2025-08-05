@@ -21,4 +21,5 @@ from . import views
 app_name='admin_main'
 urlpatterns = [
     path('',views.dashboard,name="dashboard"),
+    path("logout/",views.logout,name="logout"),
 ]

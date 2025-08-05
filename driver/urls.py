@@ -19,4 +19,5 @@ from . import views
 app_name='driver'
 urlpatterns = [
     path('',views.dashboard,name="dashboard"),
+    path("logout/",views.logout,name="logout"),
 ]
