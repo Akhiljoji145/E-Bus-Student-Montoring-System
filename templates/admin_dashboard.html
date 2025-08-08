@@ -11,18 +11,18 @@
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 
     <nav class="bg-white shadow-lg">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="flex justify-between items-center py-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
-                    </div>
-                    <div class="flex space-x-4">
-                        <button class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors"><a href="">Home</a></button>
-                        <button id="logoutBtn" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors"><a href="{% url 'student:logout' %}">Logout</a></button>
-                    </div>
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
+                </div>
+                <div class="flex space-x-4">
+                    <button class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors"><a href="">Home</a></button>
+                    <button id="logoutBtn" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors"><a href="{% url 'student:logout' %}">Logout</a></button>
                 </div>
             </div>
-        </nav>
+        </div>
+    </nav>
 
     <div id="admin-section" class="section active">
         <div class="max-w-7xl mx-auto py-8 px-4">
@@ -31,33 +31,10 @@
                 <p class="text-gray-600">Complete system control and oversight</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <!-- System Stats -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">📊 System Overview</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span>Total Students:</span>
-                            <span class="font-semibold">1,247</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Active Buses:</span>
-                            <span class="font-semibold">15</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Pending Complaints:</span>
-                            <span class="font-semibold text-red-600">12</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Active Drivers:</span>
-                            <span class="font-semibold">15</span>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <!-- User Management -->
                 <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">👥 Delete Users</h3>
+                    <h3 class="text-xl font-semibold mb-4">👥 Manage Users</h3>
                     <div class="space-y-3">
                         <select id="userSelect" class="w-full p-2 border rounded-md">
                             <option>John Doe - Student</option>
@@ -66,11 +43,16 @@
                             <option>Sarah Wilson - Management</option>
                             <option>Tom Brown - Driver</option>
                         </select>
-                        <button onclick="deleteUser()" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors">
-                            🗑️ Delete from All Modules
-                        </button>
+                        <div class="flex space-x-2">
+                            <button onclick="deleteUser ()" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors">
+                                🗑️ Delete User
+                            </button>
+                            <button onclick="updateUser ()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                ✏️ Update User
+                            </button>
+                        </div>
                         <div class="text-xs text-gray-500 mt-2">
-                            This will remove the user from all system modules
+                            This will remove or update the user in the system.
                         </div>
                     </div>
                 </div>
@@ -82,18 +64,12 @@
                         <div class="p-3 bg-yellow-50 rounded border-l-4 border-yellow-400">
                             <p class="text-sm font-medium">Bus #5 late pickup</p>
                             <p class="text-xs text-gray-600">From: Parent (Emma's Mom)</p>
-                            <div class="flex gap-2 mt-2">
-                                <button onclick="acceptComplaint(this)" class="text-xs bg-green-600 text-white px-2 py-1 rounded">Accept</button>
-                                <button onclick="rejectComplaint(this)" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Reject</button>
-                            </div>
+                            <p class="text-xs text-gray-600">Action Taken: <span class="text-green-700">Accepted</span></p>
                         </div>
                         <div class="p-3 bg-yellow-50 rounded border-l-4 border-yellow-400">
                             <p class="text-sm font-medium">Overcrowded bus issue</p>
                             <p class="text-xs text-gray-600">From: Student (Alex R.)</p>
-                            <div class="flex gap-2 mt-2">
-                                <button onclick="acceptComplaint(this)" class="text-xs bg-green-600 text-white px-2 py-1 rounded">Accept</button>
-                                <button onclick="rejectComplaint(this)" class="text-xs bg-red-600 text-white px-2 py-1 rounded">Reject</button>
-                            </div>
+                            <p class="text-xs text-gray-600">Action Taken: <span class="text-red-700">Rejected</span></p>
                         </div>
                     </div>
                 </div>
@@ -103,21 +79,17 @@
 
     <script>
         // Admin Functions
-        function deleteUser() {
+        function deleteUser () {
             const user = document.getElementById('userSelect').value;
             if (confirm(`Are you sure you want to delete ${user} from ALL modules?`)) {
                 alert(`${user} has been permanently deleted from all system modules:\n- Student records\n- Parent access\n- Teacher lists\n- Driver assignments\n- Management database`);
             }
         }
 
-        function acceptComplaint(btn) {
-            const complaint = btn.closest('div').querySelector('p').textContent;
-            btn.closest('div').innerHTML = `<p class="text-sm text-green-700">✅ ${complaint} - ACCEPTED & RESOLVED</p>`;
-        }
-
-        function rejectComplaint(btn) {
-            const complaint = btn.closest('div').querySelector('p').textContent;
-            btn.closest('div').innerHTML = `<p class="text-sm text-red-700">❌ ${complaint} - REJECTED</p>`;
+        function updateUser () {
+            const user = document.getElementById('userSelect').value;
+            alert(`You can now update the details for ${user}.`);
+            // Implement update functionality here
         }
     </script>
 </body>

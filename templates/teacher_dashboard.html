@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management Dashboard - BusTracker Pro</title>
+    <title>Teacher Dashboard - BusTracker Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{% static 'common_scripts.js' %}"></script>
     <script>
@@ -17,119 +17,175 @@
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 
     <script>loadDashboardNav();</script>
-
-    <div id="management-section" class="section active">
+    <nav class="bg-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="window.location.href='index.html'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
+                        <button id="logoutBtn" onclick="logout()" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors">Logout</button>
+                    </div>
+                </div>
+            </div>
+    </nav>
+    <div id="teacher-dashboard-section" class="section active">
         <div class="max-w-7xl mx-auto py-8 px-4">
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Bus Management Dashboard</h1>
-                <p class="text-gray-600">Monitor bus operations and student communications</p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Teacher Dashboard</h1>
+                <p class="text-gray-600">Manage student bus activities and alerts</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Send Student Credentials -->
+                <!-- Missing Student Alerts -->
                 <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">📧 Send Bus Student Credentials</h3>
-                    <form onsubmit="sendBusCredentials(event)" class="space-y-4">
+                    <h3 class="text-xl font-semibold mb-4">🚨 Missing Student Alerts</h3>
+                    <div id="missingStudentAlerts" class="space-y-4">
+                        <!-- Alerts will be dynamically added here -->
+                        <div class="p-4 bg-red-100 border border-red-300 rounded-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-red-900">Student Missing: John Doe</h4>
+                                <span class="text-xs text-red-700">Bus #5 - Route A</span>
+                            </div>
+                            <p class="text-sm text-red-800">Last seen at 8:00 AM at Stop 3. Did not board the bus.</p>
+                            <p class="text-xs text-gray-700">Parent Contact: (123) 456-7890</p>
+                            <button onclick="resolveMissingAlert('John Doe')" class="mt-2 text-xs bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Resolve Alert</button>
+                        </div>
+                        <div class="p-4 bg-orange-100 border border-orange-300 rounded-lg">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-orange-900">Student Not Departed: Jane Smith</h4>
+                                <span class="text-xs text-orange-700">Bus #2 - Route C</span>
+                            </div>
+                            <p class="text-sm text-orange-800">Expected to depart at 3:30 PM. Not marked as departed.</p>
+                            <p class="text-xs text-gray-700">Parent Contact: (987) 654-3210</p>
+                            <button onclick="resolveMissingAlert('Jane Smith')" class="mt-2 text-xs bg-orange-700 text-white px-3 py-1 rounded hover:bg-orange-800">Resolve Alert</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Override for Student Status -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">✍️ Manual Student Status Override</h3>
+                    <form onsubmit="manualOverride(event)" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium mb-2">Student Email</label>
-                            <input type="email" id="busStudentEmail" required class="w-full p-2 border rounded-md" placeholder="student@email.com">
+                            <label for="studentNameOverride" class="block text-sm font-medium mb-2">Student Name</label>
+                            <input type="text" id="studentNameOverride" required class="w-full p-2 border rounded-md" placeholder="Enter student name">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">Student Name</label>
-                            <input type="text" id="busStudentName" required class="w-full p-2 border rounded-md" placeholder="Student Name">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Bus Route</label>
-                            <select id="busRoute" class="w-full p-2 border rounded-md">
+                            <label for="busRouteOverride" class="block text-sm font-medium mb-2">Bus Route</label>
+                            <select id="busRouteOverride" class="w-full p-2 border rounded-md">
                                 <option>Route A - Downtown</option>
                                 <option>Route B - Suburbs</option>
                                 <option>Route C - North District</option>
                                 <option>Route D - East Side</option>
                             </select>
                         </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="busPassword" readonly class="flex-1 p-2 border rounded-md bg-gray-50" placeholder="Generated password">
-                            <button type="button" onclick="generateBusPassword()" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Generate</button>
+                        <div>
+                            <label for="statusAction" class="block text-sm font-medium mb-2">Action</label>
+                            <select id="statusAction" class="w-full p-2 border rounded-md">
+                                <option value="boarded">Mark as Boarded</option>
+                                <option value="departed">Mark as Departed</option>
+                                <option value="absent">Mark as Absent</option>
+                            </select>
                         </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                            📧 Send Bus Credentials
+                        <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+                            Apply Manual Override
                         </button>
                     </form>
                 </div>
 
-                <!-- Bus Complaints Dashboard -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">🚌 Bus Complaints & Monitoring</h3>
-                    <div class="space-y-4">
-                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-red-800">Bus #3 - Overcrowding</h4>
-                                <span class="text-xs text-red-600">2 min ago</span>
-                            </div>
-                            <p class="text-sm text-red-700">Too many students on morning route</p>
-                            <p class="text-xs text-gray-600">Reporter: Student Alex R.</p>
-                            <button onclick="viewComplaintDetails('Bus #3 overcrowding issue')" class="mt-2 text-xs bg-red-600 text-white px-3 py-1 rounded">View Details</button>
+                <!-- Report Missing Student -->
+                <div class="bg-white rounded-lg shadow-lg p-6 col-span-1 lg:col-span-2">
+                    <h3 class="text-xl font-semibold mb-4">⚠️ Report a Missing Student</h3>
+                    <form onsubmit="reportMissingStudent(event)" class="space-y-4">
+                        <div>
+                            <label for="reportStudentName" class="block text-sm font-medium mb-2">Student Name</label>
+                            <input type="text" id="reportStudentName" required class="w-full p-2 border rounded-md" placeholder="Student's full name">
                         </div>
-                        
-                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-yellow-800">Bus #7 - Late Arrival</h4>
-                                <span class="text-xs text-yellow-600">15 min ago</span>
-                            </div>
-                            <p class="text-sm text-yellow-700">Consistent delays on Route B</p>
-                            <p class="text-xs text-gray-600">Reporter: Parent (Mike's Dad)</p>
-                            <button onclick="viewComplaintDetails('Bus #7 late arrival issue')" class="mt-2 text-xs bg-yellow-600 text-white px-3 py-1 rounded">View Details</button>
+                        <div>
+                            <label for="reportBusRoute" class="block text-sm font-medium mb-2">Bus Route</label>
+                            <select id="reportBusRoute" class="w-full p-2 border rounded-md">
+                                <option>Route A - Downtown</option>
+                                <option>Route B - Suburbs</option>
+                                <option>Route C - North District</option>
+                                <option>Route D - East Side</option>
+                            </select>
                         </div>
-
-                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-blue-800">Bus #12 - Maintenance</h4>
-                                <span class="text-xs text-blue-600">1 hour ago</span>
-                            </div>
-                            <p class="text-sm text-blue-700">AC not working properly</p>
-                            <p class="text-xs text-gray-600">Reporter: Driver Tom B.</p>
-                            <button onclick="viewComplaintDetails('Bus #12 maintenance issue')" class="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded">View Details</button>
+                        <div>
+                            <label for="reportDetails" class="block text-sm font-medium mb-2">Details / Last Known Location</label>
+                            <textarea id="reportDetails" rows="3" class="w-full p-2 border rounded-md" placeholder="e.g., Did not show up at stop 5, last seen near school gate."></textarea>
                         </div>
-                    </div>
+                        <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">
+                            Report Missing Student
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Management Functions
-        function generateBusPassword() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let password = '';
-            for (let i = 0; i < 8; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            document.getElementById('busPassword').value = password;
+        // Teacher Dashboard Functions
+        function resolveMissingAlert(studentName) {
+            alert(`Resolving alert for ${studentName}. This would typically update a database and remove the alert from the dashboard.`);
+            // In a real application, you'd send an AJAX request to your backend
+            // and then remove the specific alert div from the DOM.
+            // For demonstration, we'll just show an alert.
         }
 
-        function sendBusCredentials(event) {
+        function manualOverride(event) {
             event.preventDefault();
-            const email = document.getElementById('busStudentEmail').value;
-            const name = document.getElementById('busStudentName').value;
-            const route = document.getElementById('busRoute').value;
-            const password = document.getElementById('busPassword').value;
-            
-            if (!password) {
-                alert('Please generate a password first!');
-                return;
-            }
-            
-            alert(`Bus credentials sent to ${name} (${email})\nRoute: ${route}\nPassword: ${password}\n\nEmail Content:\n"Dear ${name}, your bus login credentials are ready. Use email: ${email} and password: ${password} to access the bus tracking system."`);
-            
+            const studentName = document.getElementById('studentNameOverride').value;
+            const busRoute = document.getElementById('busRouteOverride').value;
+            const action = document.getElementById('statusAction').value;
+
+            alert(`Manual override applied:\nStudent: ${studentName}\nBus Route: ${busRoute}\nAction: Marked as ${action}`);
+            // In a real application, this would send data to your backend to update student status.
             // Clear form
-            document.getElementById('busStudentEmail').value = '';
-            document.getElementById('busStudentName').value = '';
-            document.getElementById('busPassword').value = '';
+            document.getElementById('studentNameOverride').value = '';
+            document.getElementById('busRouteOverride').value = 'Route A - Downtown';
+            document.getElementById('statusAction').value = 'boarded';
         }
 
-        function viewComplaintDetails(complaint) {
-            alert(`📋 COMPLAINT DETAILS:\n\n${complaint}\n\nFull Report:\n- Time: Morning Route\n- Witnesses: 3 students\n- Driver Response: Acknowledged\n- Action Required: Route optimization\n- Status: Under Investigation\n- Status: Under Investigation\n\nThis would open a detailed management interface with photos, witness statements, and resolution tracking.`);
+        function reportMissingStudent(event) {
+            event.preventDefault();
+            const studentName = document.getElementById('reportStudentName').value;
+            const busRoute = document.getElementById('reportBusRoute').value;
+            const details = document.getElementById('reportDetails').value;
+
+            alert(`Missing student reported:\nStudent: ${studentName}\nBus Route: ${busRoute}\nDetails: ${details}\n\nThis report would be sent to administrators and trigger an emergency protocol.`);
+            // In a real application, this would send data to your backend to log the missing student
+            // and potentially trigger notifications to relevant personnel.
+            // Clear form
+            document.getElementById('reportStudentName').value = '';
+            document.getElementById('reportBusRoute').value = 'Route A - Downtown';
+            document.getElementById('reportDetails').value = '';
         }
+
+        // Example of adding a dynamic alert (can be triggered by backend data)
+        function addMissingStudentAlert(name, bus, lastSeen, contact) {
+            const alertsContainer = document.getElementById('missingStudentAlerts');
+            const newAlert = document.createElement('div');
+            newAlert.className = 'p-4 bg-red-100 border border-red-300 rounded-lg';
+            newAlert.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-medium text-red-900">Student Missing: ${name}</h4>
+                    <span class="text-xs text-red-700">${bus}</span>
+                </div>
+                <p class="text-sm text-red-800">${lastSeen}</p>
+                <p class="text-xs text-gray-700">Parent Contact: ${contact}</p>
+                <button onclick="resolveMissingAlert('${name}')" class="mt-2 text-xs bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Resolve Alert</button>
+            `;
+            alertsContainer.prepend(newAlert); // Add to the top
+        }
+
+        // You could call addMissingStudentAlert() based on real-time data from your backend.
+        // For demonstration, let's add one after a short delay:
+        // setTimeout(() => {
+        //     addMissingStudentAlert('Alice Wonderland', 'Bus #10 - Route B', 'Did not board at school.', '(555) 123-4567');
+        // }, 3000);
+
     </script>
 </body>
 </html>

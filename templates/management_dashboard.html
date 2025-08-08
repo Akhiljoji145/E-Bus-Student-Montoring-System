@@ -7,6 +7,49 @@
     <title>Management Dashboard - BusTracker Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{% static 'common_scripts.js' %}"></script>
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            /* These flex properties will take effect when display is set to 'flex' by JS */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            /* Ensure content doesn't overflow on smaller screens */
+            max-height: 90vh; /* Limit height to viewport height */
+            overflow-y: auto; /* Add scroll if content exceeds max-height */
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute; /* Position relative to modal-content */
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+        }
+    </style>
     <script>
     function logout() {
     localStorage.removeItem('currentUserRole'); // Clear stored role
@@ -17,7 +60,19 @@
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 
     <script>loadDashboardNav();</script>
-
+    <nav class="bg-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="window.location.href='index.html'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
+                        <button id="logoutBtn" onclick="logout()" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors">Logout</button>
+                    </div>
+                </div>
+            </div>
+    </nav>
     <div id="management-section" class="section active">
         <div class="max-w-7xl mx-auto py-8 px-4">
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -55,6 +110,14 @@
                             📧 Send Bus Credentials
                         </button>
                     </form>
+                    <!-- Add Students Button moved here, inside the same div -->
+                    <button onclick="openAddStudentModal()"
+                       class="w-full bg-green-600 text-white py-3 px-6 rounded-lg shadow-lg
+                              hover:bg-green-700 transition-all duration-300 hover:shadow-xl
+                              flex items-center justify-center gap-2 mt-6"> <!-- Added mt-6 for spacing -->
+                        <span class="text-xl">➕</span>
+                        <span>Add Students</span>
+                    </button>
                 </div>
 
                 <!-- Bus Complaints Dashboard -->
@@ -68,9 +131,9 @@
                             </div>
                             <p class="text-sm text-red-700">Too many students on morning route</p>
                             <p class="text-xs text-gray-600">Reporter: Student Alex R.</p>
-                            <button onclick="viewComplaintDetails('Bus #3 overcrowding issue')" class="mt-2 text-xs bg-red-600 text-white px-3 py-1 rounded">View Details</button>
+                            <button onclick="viewComplaintDetails('Bus #3 - Overcrowding Issue')" class="mt-2 text-xs bg-red-600 text-white px-3 py-1 rounded">View Details</button>
                         </div>
-                        
+
                         <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                             <div class="flex justify-between items-start mb-2">
                                 <h4 class="font-medium text-yellow-800">Bus #7 - Late Arrival</h4>
@@ -78,7 +141,7 @@
                             </div>
                             <p class="text-sm text-yellow-700">Consistent delays on Route B</p>
                             <p class="text-xs text-gray-600">Reporter: Parent (Mike's Dad)</p>
-                            <button onclick="viewComplaintDetails('Bus #7 late arrival issue')" class="mt-2 text-xs bg-yellow-600 text-white px-3 py-1 rounded">View Details</button>
+                            <button onclick="viewComplaintDetails('Bus #7 - Late Arrival Issue')" class="mt-2 text-xs bg-yellow-600 text-white px-3 py-1 rounded">View Details</button>
                         </div>
 
                         <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -88,10 +151,53 @@
                             </div>
                             <p class="text-sm text-blue-700">AC not working properly</p>
                             <p class="text-xs text-gray-600">Reporter: Driver Tom B.</p>
-                            <button onclick="viewComplaintDetails('Bus #12 maintenance issue')" class="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded">View Details</button>
+                            <button onclick="viewComplaintDetails('Bus #12 - Maintenance Issue')" class="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded">View Details</button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeAddStudentModal()">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">Add Students</h2>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold mb-2">Upload CSV File</h3>
+                <input type="file" id="csvFileInput" accept=".csv" class="w-full p-2 border rounded-md mb-2">
+                <button onclick="uploadCsv()" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700">
+                    Upload CSV
+                </button>
+                <p class="text-sm text-gray-500 mt-2">Expected CSV format: Name,Email,Route</p>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Manually Add Student</h3>
+                <form onsubmit="manuallyAddStudent(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Student Name</label>
+                        <input type="text" id="manualStudentName" required class="w-full p-2 border rounded-md" placeholder="Student Name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Student Email</label>
+                        <input type="email" id="manualStudentEmail" required class="w-full p-2 border rounded-md" placeholder="student@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Bus Route</label>
+                        <select id="manualBusRoute" class="w-full p-2 border rounded-md">
+                            <option>Route A - Downtown</option>
+                            <option>Route B - Suburbs</option>
+                            <option>Route C - North District</option>
+                            <option>Route D - East Side</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                        Add Student Manually
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -113,14 +219,14 @@
             const name = document.getElementById('busStudentName').value;
             const route = document.getElementById('busRoute').value;
             const password = document.getElementById('busPassword').value;
-            
+
             if (!password) {
                 alert('Please generate a password first!');
                 return;
             }
-            
+
             alert(`Bus credentials sent to ${name} (${email})\nRoute: ${route}\nPassword: ${password}\n\nEmail Content:\n"Dear ${name}, your bus login credentials are ready. Use email: ${email} and password: ${password} to access the bus tracking system."`);
-            
+
             // Clear form
             document.getElementById('busStudentEmail').value = '';
             document.getElementById('busStudentName').value = '';
@@ -128,7 +234,120 @@
         }
 
         function viewComplaintDetails(complaint) {
-            alert(`📋 COMPLAINT DETAILS:\n\n${complaint}\n\nFull Report:\n- Time: Morning Route\n- Witnesses: 3 students\n- Driver Response: Acknowledged\n- Action Required: Route optimization\n- Status: Under Investigation\n- Status: Under Investigation\n\nThis would open a detailed management interface with photos, witness statements, and resolution tracking.`);
+            const modal = document.createElement('div');
+            modal.innerHTML = `
+                <div id="complaintModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-button" onclick="this.parentElement.parentElement.style.display='none'">&times;</span>
+                        <h2 class="text-2xl font-bold mb-4">📋 Complaint Details</h2>
+                        <div class="space-y-4">
+                            <p class="text-lg font-semibold">${complaint}</p>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <h3 class="font-bold mb-2">Full Report</h3>
+                                <ul class="list-disc pl-5 space-y-1">
+                                    <li>Time: Morning Route</li>
+                                    <li>Witnesses: 3 students</li>
+                                    <li>Driver Response: Acknowledged</li>
+                                    <li>Action Required: Route optimization</li>
+                                    <li>Status: Under Investigation</li>
+                                </ul>
+                            </div>
+                            <p class="text-gray-600">Photos and attachments would be displayed here for evidence.</p>
+                            <button onclick="this.parentElement.parentElement.parentElement.style.display='none'" 
+                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.querySelector('.modal').style.display = 'flex';
+        }
+
+        // Modal Functions
+        function openAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'flex'; // Changed to 'flex' for centering
+        }
+
+        function closeAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'none';
+        }
+
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('addStudentModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Add Student Functions
+        function uploadCsv() {
+            const fileInput = document.getElementById('csvFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a CSV file to upload.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                processCsvData(text);
+            };
+            reader.readAsText(file);
+        }
+
+        function processCsvData(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim() !== '');
+            let studentsAdded = 0;
+            let errors = [];
+
+            // Assuming CSV format: Name,Email,Route
+            for (let i = 0; i < lines.length; i++) {
+                const parts = lines[i].split(',');
+                if (parts.length === 3) {
+                    const name = parts[0].trim();
+                    const email = parts[1].trim();
+                    const route = parts[2].trim();
+
+                    // Here you would typically send this data to a backend server
+                    // For demonstration, we'll just log it and simulate success
+                    console.log(`CSV Student Added: Name: ${name}, Email: ${email}, Route: ${route}`);
+                    studentsAdded++;
+                } else {
+                    errors.push(`Row ${i + 1}: Invalid format - "${lines[i]}"`);
+                }
+            }
+
+            let message = `Successfully added ${studentsAdded} students from CSV.`;
+            if (errors.length > 0) {
+                message += `\n\nErrors encountered:\n${errors.join('\n')}`;
+            }
+            alert(message);
+            closeAddStudentModal();
+            // Clear file input
+            document.getElementById('csvFileInput').value = ''; // Corrected to clear the file input
+        }
+
+        function manuallyAddStudent(event) {
+            event.preventDefault();
+            const name = document.getElementById('manualStudentName').value;
+            const email = document.getElementById('manualStudentEmail').value;
+            const route = document.getElementById('manualBusRoute').value;
+
+            // Here you would typically send this data to a backend server
+            // For demonstration, we'll just log it and simulate success
+            alert(`Manually added student:\nName: ${name}\nEmail: ${email}\nRoute: ${route}`);
+            console.log(`Manually Added Student: Name: ${name}, Email: ${email}, Route: ${route}`);
+
+            // Clear form
+            document.getElementById('manualStudentName').value = '';
+            document.getElementById('manualStudentEmail').value = '';
+            document.getElementById('manualBusRoute').value = 'Route A - Downtown'; // Reset to default option
+            closeAddStudentModal();
         }
     </script>
 </body>
