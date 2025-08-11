@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Bus Student Monitoring System - Dashboard Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .role-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .login-form {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    
+    <!-- Dashboard Header -->
+    <div class="min-h-screen flex items-center justify-center py-12 px-4">
+        <div class="max-w-6xl w-full">
+            
+            <!-- Welcome Section -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-600 rounded-full mb-4">
+                    <i class="fas fa-bus text-white text-2xl"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">E-Bus Student Monitoring System</h1>
+                <p class="text-xl text-gray-600">Welcome! Please select your role to continue</p>
+            </div>
+
+            <!-- Role Selection Dashboard -->
+            <div id="role-dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                
+                <!-- Admin Card -->
+                <div onclick="showLoginForm('admin')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-shield text-red-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Admin</h3>
+                    <p class="text-gray-600 text-sm">System administrators and super users</p>
+                    <div class="mt-4 text-xs text-gray-500">
+                        <i class="fas fa-cog mr-1"></i> Full System Access
+                    </div>
+                </div>
+
+                <!-- Management Card -->
+                <div onclick="showLoginForm('management')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bus text-orange-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Management</h3>
+                    <p class="text-gray-600 text-sm">Transport management and operations</p>
+                    <div class="mt-4 text-xs text-gray-500">
+                        <i class="fas fa-route mr-1"></i> Route & Bus Management
+                    </div>
+                </div>
+
+                <!-- Teacher Card -->
+                <div onclick="showLoginForm('teacher')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-chalkboard-teacher text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Teacher</h3>
+                    <p class="text-gray-600 text-sm">Faculty and teaching staff</p>
+                    <div class="mt-4 text-xs text-gray-500">
+                        <i class="fas fa-users mr-1"></i> Student Management
+                    </div>
+                </div>
+
+                <!-- Parent Card -->
+                <div onclick="showLoginForm('parent')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-friends text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Parent</h3>
+                    <p class="text-gray-600 text-sm">Parents and guardians</p>
+                    <div class="mt-4 text-xs text-gray-500">
+                        <i class="fas fa-child mr-1"></i> Child Tracking
+                    </div>
+                </div>
+
+                <!-- Driver Card -->
+                <div onclick="showLoginForm('driver')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="text-green-600 text-2xl"><img src="{% static 'img/wheel.png' %}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Driver</h3>
+                    <p class="text-gray-600 text-sm">Bus drivers</p>
+                    <div class="mt-4 text-xs text-gray-500">
+                        <i class="fas fa-map-marker-alt mr-1"></i> Route Navigation
+                    </div>
+                </div>
+
+                <!-- Student Card -->
+                <div onclick="window.location.href='{% url "student:login" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-graduation-cap text-yellow-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Student</h3>
+                    <p class="text-gray-600 text-sm">Students and pupils</p>
+                    <div class="mt-4 text-xs text-gray-500">
+                        <i class="fas fa-clock mr-1"></i> Attendance & Tracking
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Forms -->
+            <div id="login-forms-container">
+                <!-- Admin Login Form -->
+                <div id="admin-form" class="login-form bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
+                    <button onclick="hideLoginForm()" class="text-indigo-600 hover:text-indigo-700 mb-4 flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                    </button>
+                    
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-shield text-red-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">Admin Login</h3>
+                        <p class="text-gray-600">Sign in to access admin dashboard</p>
+                    </div>
+
+                    <form onsubmit="handleRoleLogin(event, 'admin')">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="admin-email" value="admin@gmail.com" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="admin-password" value="admin" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                            </div>
+                            <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors font-medium">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Sign In as Admin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Similar forms for other roles -->
+                <div id="management-form" class="login-form bg-white rounded-xl shadow-lg p-8I have reviewed the existing login.html file you have on your desktop. It already has a dashboard-style login page where users can select their role by clicking buttons (Admin, Management, Teacher, etc.) and then enter their email and password. The login form validates credentials and redirects to the respective dashboard page for each role.
+
