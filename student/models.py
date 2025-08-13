@@ -15,6 +15,8 @@ class registery(models.Model):
 class student_complaints(models.Model):
     student_id=models.IntegerField()
     complaint=models.TextField()
+    bus=models.IntegerField()
+    complaint_by=models.CharField(default='Student',max_length=10,blank=True)
     date=models.DateTimeField(auto_now=True)
     status=models.CharField(max_length=50,blank=True)
     action_taken=models.TextField(blank=True)

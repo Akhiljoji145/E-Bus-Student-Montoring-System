@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib import messages
-from .models import student_details
+from .models import student_details,student_complaints
+from driver.models import Bus
 
 # Create your views here
 def home(request):
@@ -13,6 +14,7 @@ def login(request):
         password = request.POST.get('password')
         try:
             student = student_details.objects.get(email=email, password=password)
+            bus= Bus.objects.all()
             request.session['student_id'] = student.id
             request.session['student_name'] = student.name
             request.session['student_email'] = student.email
@@ -20,7 +22,7 @@ def login(request):
             request.session['student_branch'] = student.branch
             request.session['accommodation_type'] = student.accommodation_type
             
-            return redirect('/dashboard/')
+            return render(request,'student_dashboard.html',{'student':student,'bus':bus})
         except student_details.DoesNotExist:
             messages.error(request, 'Invalid email or password')
             return render(request, 'student_login.html')
@@ -44,18 +46,25 @@ def logout(request):
     
     return redirect('/login')
 
+    
+
+def submit_complaint(request):
+    if request.method == "POST":
+        student_id=request.POST.get('id')
+        bus=request.POST.get('bus_id')
+        comp=request.POST.get('complaint')
+        complaints=student_complaints(student_id=student_id,bus=bus,complaint=comp)
+        complaints.save()
+        return redirect('/dashboard')
+
 def dashboard(request):
-    # Check if student is logged in
-    if 'student_id' not in request.session:
+    if 'student_id' in request.session:
+        student_id=request.session['student_id']
+        student=student_details.objects.get(id=student_id)
+        bus= Bus.objects.all()
+        return render(request,'student_dashboard.html',{'student':student,'bus':bus})
+    else:
         return redirect('/login')
+
+        
     
-    # Create context with session data
-    context = {
-        'student_name': request.session.get('student_name'),
-        'student_email': request.session.get('student_email'),
-        'student_class': request.session.get('student_class'),
-        'student_branch': request.session.get('student_branch'),
-        'accommodation_type': request.session.get('accommodation_type'),
-    }
-    
-    return render(request,'student_dashboard.html')
