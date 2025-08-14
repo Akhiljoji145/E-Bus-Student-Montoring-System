@@ -74,8 +74,13 @@
 
             <!-- Preferred Bus -->
             <div>
-                <label for="preferredBus" class="block text-sm font-medium mb-2">Preferred Bus (Optional)</label>
-                <input type="text" id="preferredBus" name="preferred_bus" class="w-full p-2 border rounded-md" placeholder="Enter preferred bus or leave empty">
+                <label for="preferredBus" class="block text-sm font-medium mb-2">Preferred Bus</label>
+                <select name="bus_time" id="busTimeSelect" class="w-full p-2 border rounded-md">
+                    <option value="">Select One</option>
+                    {% for i in bus %}
+                        <option value="{{ i.id }}">{{ i.bus_no }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
             <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700">
@@ -93,13 +98,7 @@
             <input type="hidden" name="id" value="{{ student.id }}">
 
             <div>
-                <label class="block text-sm font-medium mb-2">Related Bus</label>
-                <select name="bus_id" class="w-full p-2 border rounded-md" required>
-                    <option value="">Not Applicable</option>
-                    {% for i in bus %}
-                        <option value="{{ i.id }}">{{ i.bus_no }}</option>
-                    {% endfor %}
-                </select>
+                <input type="hidden" name="bus_id" value="{{ student.bus }}">
             </div>
 
             <div>

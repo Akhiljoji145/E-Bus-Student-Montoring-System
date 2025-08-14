@@ -20,10 +20,10 @@ from django.urls import path
 from . import views
 app_name='student'
 urlpatterns = [
-    path("",views.home,name="home"),
-    path("login_dashboard/",views.logindashboard,name="login_dashboard"),
-    path("login/",views.login,name="login"),
-    path("logout/",views.logout,name="logout"),
-    path("complaint/",views.submit_complaint,name="complaint"),
-    path("dashboard/",views.dashboard,name="dashboard"),
+    # path("",views.home,name="home"),
+    # path("login_dashboard/",views.logindashboard,name="login_dashboard"),
+    # path("login/",views.login,name="login"),
+    # path("logout/",views.logout,name="logout"),
+    # path("complaint/",views.submit_complaint,name="complaint"),
+    # path("dashboard/",views.dashboard,name="dashboard"),
 ]

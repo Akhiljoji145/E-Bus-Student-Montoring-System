@@ -8,6 +8,7 @@ class student_details(models.Model):
     stud_class=models.CharField(max_length=50)
     branch=models.CharField(max_length=50)
     accommodation_type=models.CharField(default='Day Scholar',max_length=50)
+    bus=models.IntegerField()
 class registery(models.Model):
     FN=models.CharField(max_length=20)
     AN=models.CharField(max_length=20)
