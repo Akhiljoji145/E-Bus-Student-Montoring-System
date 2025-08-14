@@ -59,23 +59,23 @@
             <!-- Morning -->
             <div id="morningStops" class="space-y-4 hidden">
             <div>
-                <label for="morningPickupStop" class="block text-sm font-medium mb-2">Morning Pickup Stop</label>
-                <input type="text" id="morningPickupStop" name="morning_pickup" class="w-full p-2 border rounded-md" placeholder="Enter morning pickup stop">
+                <label class="block text-sm font-medium mb-2">Morning Pickup Stop</label>
+                <input type="text"  name="morning_pickup" class="w-full p-2 border rounded-md" placeholder="Enter morning pickup stop">
             </div>
         </div>
 
         <!-- Evening -->
         <div id="eveningStops" class="space-y-4 hidden">
             <div>
-                <label for="eveningDropoffStop" class="block text-sm font-medium mb-2">Evening Drop-off Stop</label>
-                <input type="text" id="eveningDropoffStop" name="evening_dropoff" class="w-full p-2 border rounded-md" placeholder="Enter evening drop-off stop">
+                <label class="block text-sm font-medium mb-2">Evening Drop-off Stop</label>
+                <input type="text" name="evening_dropoff" class="w-full p-2 border rounded-md" placeholder="Enter evening drop-off stop">
             </div>
         </div>
 
             <!-- Preferred Bus -->
             <div>
-                <label for="preferredBus" class="block text-sm font-medium mb-2">Preferred Bus</label>
-                <select name="bus_time" id="busTimeSelect" class="w-full p-2 border rounded-md">
+                <label class="block text-sm font-medium mb-2">Preferred Bus</label>
+                <select name="bus" class="w-full p-2 border rounded-md">
                     <option value="">Select One</option>
                     {% for i in bus %}
                         <option value="{{ i.id }}">{{ i.bus_no }}</option>
