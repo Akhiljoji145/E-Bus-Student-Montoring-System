@@ -21,7 +21,8 @@ class student_complaints(models.Model):
     status=models.CharField(max_length=50,blank=True)
     action_taken=models.TextField(blank=True)
 class hosteler_reg(models.Model):
-    student_name=models.CharField(max_length=50)
+    student_id=models.IntegerField()
+    pickup_time=models.CharField(max_length=50)
     pickup_point=models.CharField(max_length=50)
-    bus_id=models.CharField(max_length=50)
+    bus_id=models.IntegerField()
     status=models.CharField(max_length=50,blank=True)

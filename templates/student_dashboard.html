@@ -48,62 +48,34 @@
         <form method="POST" class="space-y-4" action="">
             {% csrf_token %}
             <div>
-                <label for="rideType" class="block text-sm font-medium mb-2">Ride Type</label>
-                <select id="rideType" name="ride_type" class="w-full p-2 border rounded-md" onchange="toggleMorningStops()">
+                <label class="block text-sm font-medium mb-2">When to Pick</label>
+                <select name="bus_time" id="busTimeSelect" class="w-full p-2 border rounded-md" required>
+                    <option value="">Select One</option>
                     <option value="morning">Morning</option>
                     <option value="evening">Evening</option>
                 </select>
             </div>
 
-            <!-- Morning Stops -->
-            <div id="morningStops" class="space-y-4">
-                <div>
-                    <label for="morningPickupStop" class="block text-sm font-medium mb-2">Morning Pickup Stop</label>
-                    <select id="morningPickupStop" name="morning_pickup" class="w-full p-2 border rounded-md">
-                        <option>Hostel Gate A</option>
-                        <option>Hostel Gate B</option>
-                        <option>Hostel Main Road</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="morningDropoffStop" class="block text-sm font-medium mb-2">Morning Drop-off Stop</label>
-                    <select id="morningDropoffStop" name="morning_dropoff" class="w-full p-2 border rounded-md">
-                        <option>Campus Main Gate</option>
-                        <option>Campus Admin Block</option>
-                        <option>Campus Library</option>
-                    </select>
-                </div>
+            <!-- Morning -->
+            <div id="morningStops" class="space-y-4 hidden">
+            <div>
+                <label for="morningPickupStop" class="block text-sm font-medium mb-2">Morning Pickup Stop</label>
+                <input type="text" id="morningPickupStop" name="morning_pickup" class="w-full p-2 border rounded-md" placeholder="Enter morning pickup stop">
             </div>
+        </div>
 
-            <!-- Evening Stops -->
-            <div id="eveningStops" class="space-y-4 hidden">
-                <div>
-                    <label for="eveningPickupStop" class="block text-sm font-medium mb-2">Evening Pickup Stop</label>
-                    <select id="eveningPickupStop" name="evening_pickup" class="w-full p-2 border rounded-md">
-                        <option>Campus Main Gate</option>
-                        <option>Campus Admin Block</option>
-                        <option>Campus Library</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="eveningDropoffStop" class="block text-sm font-medium mb-2">Evening Drop-off Stop</label>
-                    <select id="eveningDropoffStop" name="evening_dropoff" class="w-full p-2 border rounded-md">
-                        <option>Hostel Gate A</option>
-                        <option>Hostel Gate B</option>
-                        <option>Hostel Main Road</option>
-                    </select>
-                </div>
+        <!-- Evening -->
+        <div id="eveningStops" class="space-y-4 hidden">
+            <div>
+                <label for="eveningDropoffStop" class="block text-sm font-medium mb-2">Evening Drop-off Stop</label>
+                <input type="text" id="eveningDropoffStop" name="evening_dropoff" class="w-full p-2 border rounded-md" placeholder="Enter evening drop-off stop">
             </div>
+        </div>
 
             <!-- Preferred Bus -->
             <div>
                 <label for="preferredBus" class="block text-sm font-medium mb-2">Preferred Bus (Optional)</label>
-                <select id="preferredBus" name="preferred_bus" class="w-full p-2 border rounded-md">
-                    <option value="">Any Available Bus</option>
-                    <option>Bus #1 - Route A</option>
-                    <option>Bus #2 - Route B</option>
-                    <option>Bus #3 - Route C</option>
-                </select>
+                <input type="text" id="preferredBus" name="preferred_bus" class="w-full p-2 border rounded-md" placeholder="Enter preferred bus or leave empty">
             </div>
 
             <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700">
@@ -122,7 +94,7 @@
 
             <div>
                 <label class="block text-sm font-medium mb-2">Related Bus</label>
-                <select name="bus_id" class="w-full p-2 border rounded-md">
+                <select name="bus_id" class="w-full p-2 border rounded-md" required>
                     <option value="">Not Applicable</option>
                     {% for i in bus %}
                         <option value="{{ i.id }}">{{ i.bus_no }}</option>
@@ -132,7 +104,7 @@
 
             <div>
                 <label class="block text-sm font-medium mb-2">Details of Complaint</label>
-                <textarea name="complaint" rows="5" required class="w-full p-2 border rounded-md" placeholder="Please provide as much detail as possible..."></textarea>
+                <textarea name="complaint" rows="5" required class="w-full p-2 border rounded-md" placeholder="Please provide as much detail as possible..." required></textarea>
             </div>
 
             <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">
@@ -142,13 +114,7 @@
     </div>
 </div>
 
-<script>
-function toggleMorningStops() {
-    const rideType = document.getElementById("rideType").value;
-    document.getElementById("morningStops").classList.toggle("hidden", rideType !== "morning");
-    document.getElementById("eveningStops").classList.toggle("hidden", rideType !== "evening");
-}
-</script>
+<!-- JavaScript functions removed as text inputs don't require toggle functionality -->
 
                 
 
@@ -178,20 +144,6 @@ function toggleMorningStops() {
 
     <script>
         // Student Dashboard Functions
-        function toggleMorningStops() {
-            const rideType = document.getElementById('rideType').value;
-            const morningStopsDiv = document.getElementById('morningStops');
-            const eveningStopsDiv = document.getElementById('eveningStops');
-
-            if (rideType === 'morning') {
-                morningStopsDiv.classList.remove('hidden');
-                eveningStopsDiv.classList.add('hidden');
-            } else {
-                morningStopsDiv.classList.add('hidden');
-                eveningStopsDiv.classList.remove('hidden');
-            }
-        }
-
         function registerBus(event) {
             event.preventDefault();
             const rideType = document.getElementById('rideType').value;
@@ -208,6 +160,14 @@ function toggleMorningStops() {
 
             alert(`Bus Registration Confirmed!\nRide Type: ${rideType.charAt(0).toUpperCase() + rideType.slice(1)}\nPickup Stop: ${pickupStop}\nDrop-off Stop: ${dropoffStop}\nPreferred Bus: ${preferredBus || 'Any'}\n\nYour registration has been submitted.`);
         }
+        </script>
+        <script>
+document.getElementById("busTimeSelect").addEventListener("change", function() {
+    const value = this.value;
+    document.getElementById("morningStops").classList.toggle("hidden", value !== "morning");
+    document.getElementById("eveningStops").classList.toggle("hidden", value !== "evening");
+});
+</script>
 </body>
 </html>
 {% endif %}
