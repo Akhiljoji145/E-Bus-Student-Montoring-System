@@ -153,40 +153,23 @@ function toggleMorningStops() {
                 
 
                 <!-- View Action Taken on Complaints -->
+                
                 <div class="bg-white rounded-lg shadow-lg p-6 col-span-1 lg:col-span-2">
                     <h3 class="text-xl font-semibold mb-4">✅ Action Taken on Your Complaints</h3>
                     <div id="complaintActionList" class="space-y-4">
                         <!-- Complaints and actions will be dynamically loaded here -->
+                        {% for i in complaints %}
+                        {% if i.student_id == student.id %}
                         <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <h4 class="font-medium text-blue-800 mb-1">Subject: Bus #2 - Overcrowding</h4>
-                            <p class="text-sm text-blue-700 mb-2">Complaint: "Bus is always too full in the evenings, hard to find a seat."</p>
-                            <p class="text-xs text-gray-600">Submitted: 2023-10-26</p>
+                            <h4 class="font-medium text-blue-800 mb-1">{{i.complaint}}</h4>
+                            <p class="text-xs text-gray-600">Submitted: {{i.date}}</p>
                             <div class="mt-2 p-3 bg-blue-100 border border-blue-300 rounded-md">
-                                <p class="font-semibold text-blue-900">Action Taken:</p>
-                                <p class="text-sm text-blue-800">"Acknowledged. An additional bus (Bus #5) has been assigned to Route B during peak evening hours starting next week to alleviate overcrowding. Please provide feedback on the new arrangement."</p>
-                                <p class="text-xs text-gray-700 mt-1">Status: Resolved - 2023-10-28</p>
+                                <p class="text-md font-semibold text-gray-600">Action Taken: {{i.action_taken}}</p>
+                                <p class="font-semibold text-blue-900">{{i.action_taken}}</p>
                             </div>
                         </div>
-                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <h4 class="font-medium text-yellow-800 mb-1">Subject: Driver Behavior - Bus #4</h4>
-                            <p class="text-sm text-yellow-700 mb-2">Complaint: "Driver was speeding and talking on phone during ride."</p>
-                            <p class="text-xs text-gray-600">Submitted: 2023-10-20</p>
-                            <div class="mt-2 p-3 bg-yellow-100 border border-yellow-300 rounded-md">
-                                <p class="font-semibold text-yellow-900">Action Taken:</p>
-                                <p class="text-sm text-yellow-800">"Complaint received. Driver has been counseled regarding safe driving practices and use of mobile devices. Monitoring will be increased."</p>
-                                <p class="text-xs text-gray-700 mt-1">Status: In Progress - 2023-10-22</p>
-                            </div>
-                        </div>
-                        <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                            <h4 class="font-medium text-gray-800 mb-1">Subject: Late Bus - Morning Route A</h4>
-                            <p class="text-sm text-gray-700 mb-2">Complaint: "Bus #1 was 20 minutes late this morning."</p>
-                            <p class="text-xs text-gray-600">Submitted: 2023-10-15</p>
-                            <div class="mt-2 p-3 bg-gray-100 border border-gray-300 rounded-md">
-                                <p class="font-semibold text-gray-900">Action Taken:</p>
-                                <p class="text-sm text-gray-800">"Investigated. Delay was due to unexpected road construction. Route timing adjusted for future. Apologies for inconvenience."</p>
-                                <p class="text-xs text-gray-700 mt-1">Status: Resolved - 2023-10-17</p>
-                            </div>
-                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -225,114 +208,6 @@ function toggleMorningStops() {
 
             alert(`Bus Registration Confirmed!\nRide Type: ${rideType.charAt(0).toUpperCase() + rideType.slice(1)}\nPickup Stop: ${pickupStop}\nDrop-off Stop: ${dropoffStop}\nPreferred Bus: ${preferredBus || 'Any'}\n\nYour registration has been submitted.`);
         }
-
-        function submitComplaint(event) {
-            event.preventDefault();
-            const subject = document.getElementById('complaintSubject').value;
-            const busRoute = document.getElementById('complaintBusRoute').value;
-            const details = document.getElementById('complaintDetails').value;
-
-            alert(`Complaint Submitted!\nSubject: ${subject}\nBus/Route: ${busRoute || 'N/A'}\nDetails: ${details}\n\nThank you for your feedback. We will review your complaint shortly.`);
-            
-            // In a real application, this would send the complaint data to your backend.
-            // Clear form
-            document.getElementById('complaintSubject').value = '';
-            document.getElementById('complaintBusRoute').value = '';
-            document.getElementById('complaintDetails').value = '';
-        }
-
-        // Function to simulate loading complaints and their actions (from backend)
-        function loadComplaintActions() {
-            const complaintsData = [
-                {
-                    subject: 'Bus #2 - Overcrowding',
-                    complaint: 'Bus is always too full in the evenings, hard to find a seat.',
-                    submitted: '2023-10-26',
-                    action: 'Acknowledged. An additional bus (Bus #5) has been assigned to Route B during peak evening hours starting next week to alleviate overcrowding. Please provide feedback on the new arrangement.',
-                    status: 'Resolved',
-                    actionDate: '2023-10-28',
-                    type: 'resolved'
-                },
-                {
-                    subject: 'Driver Behavior - Bus #4',
-                    complaint: 'Driver was speeding and talking on phone during ride.',
-                    submitted: '2023-10-20',
-                    action: 'Complaint received. Driver has been counseled regarding safe driving practices and use of mobile devices. Monitoring will be increased.',
-                    status: 'In Progress',
-                    actionDate: '2023-10-22',
-                    type: 'in-progress'
-                },
-                {
-                    subject: 'Late Bus - Morning Route A',
-                    complaint: 'Bus #1 was 20 minutes late this morning.',
-                    submitted: '2023-10-15',
-                    action: 'Investigated. Delay was due to unexpected road construction. Route timing adjusted for future. Apologies for inconvenience.',
-                    status: 'Resolved',
-                    actionDate: '2023-10-17',
-                    type: 'resolved'
-                },
-                {
-                    subject: 'AC not working on Bus #3',
-                    complaint: 'The air conditioning on Bus #3 is not working, it gets very hot.',
-                    submitted: '2023-11-01',
-                    action: 'Maintenance request submitted for Bus #3 AC repair. Expected to be fixed by end of week.',
-                    status: 'Pending',
-                    actionDate: '2023-11-02',
-                    type: 'pending'
-                }
-            ];
-
-            const complaintActionList = document.getElementById('complaintActionList');
-            complaintActionList.innerHTML = ''; // Clear existing list
-
-            complaintsData.forEach(complaint => {
-                const complaintDiv = document.createElement('div');
-                let bgColor, borderColor, textColor, actionBgColor, actionBorderColor, actionTextColor;
-
-                if (complaint.type === 'resolved') {
-                    bgColor = 'bg-blue-50';
-                    borderColor = 'border-blue-200';
-                    textColor = 'text-blue-800';
-                    actionBgColor = 'bg-blue-100';
-                    actionBorderColor = 'border-blue-300';
-                    actionTextColor = 'text-blue-900';
-                } else if (complaint.type === 'in-progress') {
-                    bgColor = 'bg-yellow-50';
-                    borderColor = 'border-yellow-200';
-                    textColor = 'text-yellow-800';
-                    actionBgColor = 'bg-yellow-100';
-                    actionBorderColor = 'border-yellow-300';
-                    actionTextColor = 'text-yellow-900';
-                } else { // pending or other
-                    bgColor = 'bg-gray-50';
-                    borderColor = 'border-gray-200';
-                    textColor = 'text-gray-800';
-                    actionBgColor = 'bg-gray-100';
-                    actionBorderColor = 'border-gray-300';
-                    actionTextColor = 'text-gray-900';
-                }
-
-                complaintDiv.className = `p-4 ${bgColor} ${borderColor} rounded-lg`;
-                complaintDiv.innerHTML = `
-                    <h4 class="font-medium ${textColor} mb-1">Subject: ${complaint.subject}</h4>
-                    <p class="text-sm ${textColor} mb-2">Complaint: "${complaint.complaint}"</p>
-                    <p class="text-xs text-gray-600">Submitted: ${complaint.submitted}</p>
-                    <div class="mt-2 p-3 ${actionBgColor} ${actionBorderColor} rounded-md">
-                        <p class="font-semibold ${actionTextColor}">Action Taken:</p>
-                        <p class="text-sm ${actionTextColor}">${complaint.action}</p>
-                        <p class="text-xs text-gray-700 mt-1">Status: ${complaint.status} - ${complaint.actionDate}</p>
-                    </div>
-                `;
-                complaintActionList.appendChild(complaintDiv);
-            });
-        }
-
-        // Load complaints when the page loads (simulated)
-        document.addEventListener('DOMContentLoaded', () => {
-            toggleMorningStops(); // Set initial state for bus registration
-            loadComplaintActions();
-        });
-    </script>
 </body>
 </html>
 {% endif %}

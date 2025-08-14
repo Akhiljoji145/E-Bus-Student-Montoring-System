@@ -15,6 +15,7 @@ def login(request):
         try:
             student = student_details.objects.get(email=email, password=password)
             bus= Bus.objects.all()
+            complaints=student_complaints.objects.all()
             request.session['student_id'] = student.id
             request.session['student_name'] = student.name
             request.session['student_email'] = student.email
@@ -22,7 +23,7 @@ def login(request):
             request.session['student_branch'] = student.branch
             request.session['accommodation_type'] = student.accommodation_type
             
-            return render(request,'student_dashboard.html',{'student':student,'bus':bus})
+            return render(request,'student_dashboard.html',{'student':student,'bus':bus,'complaints':complaints})
         except student_details.DoesNotExist:
             messages.error(request, 'Invalid email or password')
             return render(request, 'student_login.html')
@@ -62,9 +63,11 @@ def dashboard(request):
         student_id=request.session['student_id']
         student=student_details.objects.get(id=student_id)
         bus= Bus.objects.all()
-        return render(request,'student_dashboard.html',{'student':student,'bus':bus})
+        complaints=student_complaints.objects.get(student=student_id)
+        return render(request,'student_dashboard.html',{'student':student,'bus':bus,'complaints':complaints})
     else:
         return redirect('/login')
+
 
         
     
