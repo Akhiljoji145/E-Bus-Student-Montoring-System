@@ -59,3 +59,11 @@ The 'E-Bus Student Monitoring System' is a smart transportation solution designe
 - **Backend**: Python Django
 - **Database**: MySQL / MongoDB
 - **Tools**: QR Code Scanner and QR Generator
+I am looking for contributors to collaborate on this project 🚀  
+
+📩 **Get in Touch**  
+- 📱 WhatsApp: [Click Here](https://wa.me/+919567323468)  
+- 📧 Email: akhiljojim@gmail.com or akhiljoji1451@gmail.com 
+- 📷 Instagram: [@your_insta_handle](https://instagram.com/akhiljoji_145)  
+
+💡 Feel free to reach out if you’re interested in contributing or have ideas to improve the project!
