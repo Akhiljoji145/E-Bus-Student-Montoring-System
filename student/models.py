@@ -1,5 +1,5 @@
 from django.db import models
-
+from driver.models import Bus
 class student_details(models.Model):
     name=models.CharField(max_length=50)
     email=models.EmailField()
@@ -8,22 +8,25 @@ class student_details(models.Model):
     stud_class=models.CharField(max_length=50)
     branch=models.CharField(max_length=50)
     accommodation_type=models.CharField(default='Day Scholar',max_length=50)
-    bus=models.IntegerField()
+    bus=models.ForeignKey(Bus,on_delete=models.CASCADE,null=True,blank=True)
+    def __str__(self):
+        return self.name
 class registery(models.Model):
     FN=models.CharField(max_length=20)
     AN=models.CharField(max_length=20)
-    student_id=models.IntegerField()
+    student_id=models.ForeignKey(student_details,on_delete=models.CASCADE)
 class student_complaints(models.Model):
     student_id=models.IntegerField()
     complaint=models.TextField()
-    bus=models.IntegerField()
+    bus=models.CharField(max_length=50)
     complaint_by=models.CharField(default='Student',max_length=10,blank=True)
     date=models.DateTimeField(auto_now=True)
     status=models.CharField(max_length=50,blank=True)
     action_taken=models.TextField(blank=True)
 class hosteler_reg(models.Model):
-    student_id=models.IntegerField()
+    student_id=models.ForeignKey(student_details,null=True,blank=True,on_delete=models.CASCADE)
     pickup_time=models.CharField(max_length=50)
     pickup_point=models.CharField(max_length=50)
-    bus_id=models.IntegerField()
+    bus=models.ForeignKey(Bus,on_delete=models.CASCADE)
     status=models.CharField(max_length=50,blank=True)
+    time=models.DateTimeField(auto_now=True)

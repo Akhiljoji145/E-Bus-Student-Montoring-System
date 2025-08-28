@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'driver',
     'parent',
     'student',
+    'tailwind',
+    'theme',
 ]
 
 MIDDLEWARE = [

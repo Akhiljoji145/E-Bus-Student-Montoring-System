@@ -6,12 +6,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - BusTracker Pro</title>
-    <script src="{% static 'js\cdn.tailwindcss.js' %}"></script>
+    <script src="{% static 'js/cdn.tailwindcss.js' %}"></script>
     <script src="{% static 'common_scripts.js' %}"></script>
     <script>
     function logout() {
     localStorage.removeItem('currentUserRole'); // Clear stored role
     window.location.href = '{% url "student:logout" %}'; // Redirect to login page
+    }
+
+    function deleteRegistration(registrationId) {
+        if (confirm('Are you sure you want to delete this bus registration?')) {
+            fetch(`{% url "student:delete_registration" 0 %}`.replace('0', registrationId), {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Registration deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Failed to delete registration. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the registration.');
+            });
+        }
     }
     </script>
 </head>
@@ -45,8 +69,9 @@
     <!-- Bus Registration for Hostelers -->
     <div class="bg-white rounded-lg shadow-lg p-6">
         <h3 class="text-xl font-semibold mb-4">🚌 Bus Registration (Hostelers)</h3>
-        <form method="POST" class="space-y-4" action="">
+        <form method="POST" class="space-y-4" action="{% url 'student:hosteler_registration' %}">
             {% csrf_token %}
+            <input type="hidden" name="student" class="w-full p-2 border rounded-md" value="{{student.id}}">
             <div>
                 <label class="block text-sm font-medium mb-2">When to Pick</label>
                 <select name="bus_time" id="busTimeSelect" class="w-full p-2 border rounded-md" required>
@@ -55,30 +80,19 @@
                     <option value="evening">Evening</option>
                 </select>
             </div>
-
-            <!-- Morning -->
-            <div id="morningStops" class="space-y-4 hidden">
+        <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium mb-2">Morning Pickup Stop</label>
-                <input type="text"  name="morning_pickup" class="w-full p-2 border rounded-md" placeholder="Enter morning pickup stop">
+                <label class="block text-sm font-medium mb-2">Pickup Point / Dropoff Point</label>
+                <input type="text"  name="pickup_point" class="w-full p-2 border rounded-md" placeholder="Enter morning pickup stop">
             </div>
         </div>
-
-        <!-- Evening -->
-        <div id="eveningStops" class="space-y-4 hidden">
-            <div>
-                <label class="block text-sm font-medium mb-2">Evening Drop-off Stop</label>
-                <input type="text" name="evening_dropoff" class="w-full p-2 border rounded-md" placeholder="Enter evening drop-off stop">
-            </div>
-        </div>
-
             <!-- Preferred Bus -->
             <div>
                 <label class="block text-sm font-medium mb-2">Preferred Bus</label>
                 <select name="bus" class="w-full p-2 border rounded-md">
                     <option value="">Select One</option>
                     {% for i in bus %}
-                        <option value="{{ i.id }}">{{ i.bus_no }}</option>
+                        <option value="{{ i.bus_no }}">{{ i.bus_no }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -114,11 +128,29 @@
 </div>
 
 <!-- JavaScript functions removed as text inputs don't require toggle functionality -->
+            {% if student.accommodation_type == "Hosteler" %}
+            <div class="bg-white rounded-lg shadow-lg p-6 col-span-1 lg:col-span-2">
+                    <h3 class="text-xl font-semibold mb-4">✅ Registrations</h3>
+                    <div id="complaintActionList" class="space-y-4">
+                        <!-- Complaints and actions will be dynamically loaded here -->
+                        {% for i in hosteler_reg %}
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-xs text-gray-600">Pickup time:{{i.pickup_time}}</p>
+                            <p class="text-xs text-gray-600">Pickup Point: {{i.pickup_point}}</p>
+                            <p class="text-xs text-gray-600">Bus: {{i.bus}}</p>
+                            <p class="text-xs text-gray-600">Registered Time: {{i.time}}</p>
+                            <button onclick="deleteRegistration({{i.id}})" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 
-                
 
                 <!-- View Action Taken on Complaints -->
-                
+
                 <div class="bg-white rounded-lg shadow-lg p-6 col-span-1 lg:col-span-2">
                     <h3 class="text-xl font-semibold mb-4">✅ Action Taken on Your Complaints</h3>
                     <div id="complaintActionList" class="space-y-4">
@@ -139,34 +171,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <script>
-        // Student Dashboard Functions
-        function registerBus(event) {
-            event.preventDefault();
-            const rideType = document.getElementById('rideType').value;
-            let pickupStop, dropoffStop;
-
-            if (rideType === 'morning') {
-                pickupStop = document.getElementById('morningPickupStop').value;
-                dropoffStop = document.getElementById('morningDropoffStop').value;
-            } else {
-                pickupStop = document.getElementById('eveningPickupStop').value;
-                dropoffStop = document.getElementById('eveningDropoffStop').value;
-            }
-            const preferredBus = document.getElementById('preferredBus').value;
-
-            alert(`Bus Registration Confirmed!\nRide Type: ${rideType.charAt(0).toUpperCase() + rideType.slice(1)}\nPickup Stop: ${pickupStop}\nDrop-off Stop: ${dropoffStop}\nPreferred Bus: ${preferredBus || 'Any'}\n\nYour registration has been submitted.`);
-        }
-        </script>
-        <script>
-document.getElementById("busTimeSelect").addEventListener("change", function() {
-    const value = this.value;
-    document.getElementById("morningStops").classList.toggle("hidden", value !== "morning");
-    document.getElementById("eveningStops").classList.toggle("hidden", value !== "evening");
-});
-</script>
 </body>
 </html>
 {% endif %}
