@@ -57,7 +57,7 @@
                 </div>
 
                 <!-- Management Card -->
-                <div onclick="showLoginForm('management')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                <div onclick="window.location.href='{% url "management:login" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
                     <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-bus text-orange-600 text-2xl"></i>
                     </div>

@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - BusTracker Pro</title>
-    <script src="{% static 'js/cdn.tailwindcss.js' %}"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="{% static 'common_scripts.js' %}"></script>
+
     <script>
     function logout() {
     localStorage.removeItem('currentUserRole'); // Clear stored role
@@ -37,6 +37,12 @@
             });
         }
     }
+
+    
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initBusTracking();
+    });
     </script>
 </head>
 {% if student %}
@@ -127,6 +133,8 @@
     </div>
 </div>
 
+
+
 <!-- JavaScript functions removed as text inputs don't require toggle functionality -->
             {% if student.accommodation_type == "Hosteler" %}
             <div class="bg-white rounded-lg shadow-lg p-6 col-span-1 lg:col-span-2">
@@ -161,7 +169,7 @@
                             <h4 class="font-medium text-blue-800 mb-1">{{i.complaint}}</h4>
                             <p class="text-xs text-gray-600">Submitted: {{i.date}}</p>
                             <div class="mt-2 p-3 bg-blue-100 border border-blue-300 rounded-md">
-                                <p class="text-md font-semibold text-gray-600">Action Taken: {{i.action_taken}}</p>
+                                <p class="text-md font-semibold text-gray-600">Action Taken: {{i.status}}</p>
                                 <p class="font-semibold text-blue-900">{{i.action_taken}}</p>
                             </div>
                         </div>

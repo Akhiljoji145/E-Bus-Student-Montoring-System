@@ -1,9 +1,13 @@
 from django.db import models
 from driver.models import Bus
+import uuid
+from django.utils import timezone
+from datetime import timedelta
+
 class student_details(models.Model):
     name=models.CharField(max_length=50)
     email=models.EmailField()
-    password=models.CharField(max_length=70,blank=True)
+    password=models.CharField(max_length=128)
     phone_no=models.CharField(max_length=10)
     stud_class=models.CharField(max_length=50)
     branch=models.CharField(max_length=50)
@@ -11,10 +15,12 @@ class student_details(models.Model):
     bus=models.ForeignKey(Bus,on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):
         return self.name
+
 class registery(models.Model):
     FN=models.CharField(max_length=20)
     AN=models.CharField(max_length=20)
     student_id=models.ForeignKey(student_details,on_delete=models.CASCADE)
+
 class student_complaints(models.Model):
     student_id=models.IntegerField()
     complaint=models.TextField()
@@ -23,6 +29,7 @@ class student_complaints(models.Model):
     date=models.DateTimeField(auto_now=True)
     status=models.CharField(max_length=50,blank=True)
     action_taken=models.TextField(blank=True)
+
 class hosteler_reg(models.Model):
     student_id=models.ForeignKey(student_details,null=True,blank=True,on_delete=models.CASCADE)
     pickup_time=models.CharField(max_length=50)
@@ -30,3 +37,12 @@ class hosteler_reg(models.Model):
     bus=models.ForeignKey(Bus,on_delete=models.CASCADE)
     status=models.CharField(max_length=50,blank=True)
     time=models.DateTimeField(auto_now=True)
+
+class PasswordResetToken(models.Model):
+    student = models.ForeignKey(student_details, on_delete=models.CASCADE)
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        # Token valid for 1 hour
+        return timezone.now() < self.created_at + timedelta(hours=1)

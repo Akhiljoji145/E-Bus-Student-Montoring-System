@@ -60,6 +60,7 @@
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 
     <script>loadDashboardNav();</script>
+    {% include 'management_action_popup.html' %}
     <nav class="bg-white shadow-lg">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex justify-between items-center py-4">
@@ -76,84 +77,199 @@
     <div id="management-section" class="section active">
         <div class="max-w-7xl mx-auto py-8 px-4">
             <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Bus Management Dashboard</h1>
-                <p class="text-gray-600">Monitor bus operations and student communications</p>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">Bus Management Dashboard</h1>
+                        <p class="text-gray-600">Monitor bus operations and student communications</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-semibold text-indigo-600">Welcome, {{ user_name }}</p>
+                        <p class="text-sm text-gray-500">{{ total_students }} Students • {{ total_drivers }} Drivers • {{ total_teachers }} Teachers • {{ total_buses }} Buses</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <span class="text-2xl">👥</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Students</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ total_students }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <span class="text-2xl">🚍</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Drivers</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ total_drivers }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                            <span class="text-2xl">🚌</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Buses</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ total_buses }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                            <span class="text-2xl">👨‍🏫</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Teachers</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ total_teachers }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-red-100 text-red-600">
+                            <span class="text-2xl">⚠️</span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Pending Complaints</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ pending_complaints }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Send Student Credentials -->
+                <!-- Student Management Actions -->
                 <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">📧 Send Bus Student Credentials</h3>
-                    <form onsubmit="sendBusCredentials(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Student Email</label>
-                            <input type="email" id="busStudentEmail" required class="w-full p-2 border rounded-md" placeholder="student@email.com">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Student Name</label>
-                            <input type="text" id="busStudentName" required class="w-full p-2 border rounded-md" placeholder="Student Name">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">Bus Route</label>
-                            <select id="busRoute" class="w-full p-2 border rounded-md">
-                                <option>Route A - Downtown</option>
-                                <option>Route B - Suburbs</option>
-                                <option>Route C - North District</option>
-                                <option>Route D - East Side</option>
-                            </select>
-                        </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="busPassword" readonly class="flex-1 p-2 border rounded-md bg-gray-50" placeholder="Generated password">
-                            <button type="button" onclick="generateBusPassword()" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">Generate</button>
-                        </div>
-                        <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                            📧 Send Bus Credentials
-                        </button>
-                    </form>
-                    <!-- Add Students Button moved here, inside the same div -->
+                    <h3 class="text-xl font-semibold mb-4">👥 Student Management</h3>
+                    <p class="text-gray-600 mb-6">Add students individually or in bulk. Email credentials are automatically sent upon successful registration.</p>
+
+                    <!-- Add Student Button -->
                     <button onclick="openAddStudentModal()"
                        class="w-full bg-green-600 text-white py-3 px-6 rounded-lg shadow-lg
                               hover:bg-green-700 transition-all duration-300 hover:shadow-xl
-                              flex items-center justify-center gap-2 mt-6"> <!-- Added mt-6 for spacing -->
+                              flex items-center justify-center gap-2 mb-4">
                         <span class="text-xl">➕</span>
                         <span>Add Students</span>
                     </button>
+
+                    <!-- Add Driver Button -->
+                    <button onclick="openAddDriverModal()"
+                       class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg shadow-lg
+                              hover:bg-blue-700 transition-all duration-300 hover:shadow-xl
+                              flex items-center justify-center gap-2 mb-4">
+                        <span class="text-xl">🚍</span>
+                        <span>Add Driver</span>
+                    </button>
+
+                    <!-- Add Management Personnel Button -->
+                    <button onclick="openAddManagementModal()"
+                       class="w-full bg-purple-600 text-white py-3 px-6 rounded-lg shadow-lg
+                              hover:bg-purple-700 transition-all duration-300 hover:shadow-xl
+                              flex items-center justify-center gap-2 mb-4">
+                        <span class="text-xl">👔</span>
+                        <span>Add Management Personnel</span>
+                    </button>
+
+                    <!-- Add Teacher Button -->
+                    <button onclick="openAddTeacherModal()"
+                       class="w-full bg-yellow-600 text-white py-3 px-6 rounded-lg shadow-lg
+                              hover:bg-yellow-700 transition-all duration-300 hover:shadow-xl
+                              flex items-center justify-center gap-2">
+                        <span class="text-xl">👨‍🏫</span>
+                        <span>Add Teacher</span>
+                    </button>
+
+                    <!-- Email Status Info -->
+                    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 class="text-sm font-semibold text-blue-800 mb-2">🔐 Automatic Password Generation & Email</h4>
+                        <ul class="text-xs text-blue-700 space-y-1">
+                            <li>• Secure passwords automatically generated for each student</li>
+                            <li>• Student credentials emailed immediately after registration</li>
+                            <li>• Professional HTML emails with login instructions</li>
+                            <li>• No manual password entry required</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <!-- Bus Complaints Dashboard -->
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h3 class="text-xl font-semibold mb-4">🚌 Bus Complaints & Monitoring</h3>
                     <div class="space-y-4">
-                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        {% for complaint in recent_complaints %}
+                        <div class="p-4 {% if complaint.status == 'pending' or complaint.status == '' %}bg-yellow-50 border border-yellow-200 rounded-lg{% elif complaint.status == 'resolved' %}bg-green-50 border border-green-200 rounded-lg{% else %}bg-red-50 border border-red-200 rounded-lg{% endif %}">
                             <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-red-800">Bus #3 - Overcrowding</h4>
-                                <span class="text-xs text-red-600">2 min ago</span>
+                                <h4 class="font-medium {% if complaint.status == 'pending' or complaint.status == '' %}text-yellow-800{% elif complaint.status == 'resolved' %}text-green-800{% else %}text-red-800{% endif %}">{{ complaint.bus }} - {{ complaint.complaint|truncatechars:30 }}</h4>
+                                <span class="text-xs {% if complaint.status == 'pending' or complaint.status == '' %}text-yellow-600{% elif complaint.status == 'resolved' %}text-green-600{% else %}text-red-600{% endif %}">{{ complaint.date|timesince }} ago</span>
                             </div>
-                            <p class="text-sm text-red-700">Too many students on morning route</p>
-                            <p class="text-xs text-gray-600">Reporter: Student Alex R.</p>
-                            <button onclick="viewComplaintDetails('Bus #3 - Overcrowding Issue')" class="mt-2 text-xs bg-red-600 text-white px-3 py-1 rounded">View Details</button>
-                        </div>
-
-                        <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-yellow-800">Bus #7 - Late Arrival</h4>
-                                <span class="text-xs text-yellow-600">15 min ago</span>
+                            <p class="text-sm {% if complaint.status == 'pending' or complaint.status == '' %}text-yellow-700{% elif complaint.status == 'resolved' %}text-green-700{% else %}text-red-700{% endif %}">{{ complaint.complaint }}</p>
+                            <p class="text-xs text-gray-600">Reporter: {{ complaint.complaint_by }}</p>
+                            <div class="mt-2 flex space-x-2">
+                                <button onclick="viewComplaintDetails('{{ complaint.bus }} - {{ complaint.complaint|escapejs }}')" class="text-xs bg-blue-600 text-white px-3 py-1 rounded">View Details</button>
+                                {% if complaint.status == 'pending' or complaint.status == '' %}
+                                <button onclick="openActionPopup({{ complaint.id }})" class="text-xs bg-green-600 text-white px-3 py-1 rounded">Take Action</button>
+                                {% endif %}
                             </div>
-                            <p class="text-sm text-yellow-700">Consistent delays on Route B</p>
-                            <p class="text-xs text-gray-600">Reporter: Parent (Mike's Dad)</p>
-                            <button onclick="viewComplaintDetails('Bus #7 - Late Arrival Issue')" class="mt-2 text-xs bg-yellow-600 text-white px-3 py-1 rounded">View Details</button>
                         </div>
-
-                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-blue-800">Bus #12 - Maintenance</h4>
-                                <span class="text-xs text-blue-600">1 hour ago</span>
-                            </div>
-                            <p class="text-sm text-blue-700">AC not working properly</p>
-                            <p class="text-xs text-gray-600">Reporter: Driver Tom B.</p>
-                            <button onclick="viewComplaintDetails('Bus #12 - Maintenance Issue')" class="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded">View Details</button>
-                        </div>
+                        {% empty %}
+                        <p class="text-gray-600">No recent complaints.</p>
+                        {% endfor %}
                     </div>
+                </div>
+            </div>
+
+            <!-- Bus Status Overview -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h3 class="text-xl font-semibold mb-4">🚌 Bus Status Overview</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bus No</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Starting Point</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Drivers</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complaints</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for bus in bus_status %}
+                            <tr>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ bus.bus_no }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ bus.starting_point }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ bus.drivers }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ bus.students }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ bus.complaints }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    {% if bus.complaints > 0 %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Issues</span>
+                                    {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Good</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-4 py-2 text-center text-gray-500">No buses found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -163,74 +279,211 @@
     <div id="addStudentModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeAddStudentModal()">&times;</span>
-            <h2 class="text-2xl font-bold mb-4">Add Students</h2>
+            <h2 class="text-2xl font-bold mb-4">Add Students (Bulk Upload Recommended)</h2>
 
-            <div class="mb-6">
-                <h3 class="text-xl font-semibold mb-2">Upload CSV File</h3>
+            <!-- Primary: CSV Upload -->
+            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 class="text-xl font-semibold mb-2 text-blue-800">📄 Upload CSV File (Recommended for Large Groups)</h3>
                 <input type="file" id="csvFileInput" accept=".csv" class="w-full p-2 border rounded-md mb-2">
-                <button onclick="uploadCsv()" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700">
-                    Upload CSV
+                <button onclick="uploadCsv()" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 font-semibold">
+                    📤 Upload Student CSV
                 </button>
-                <p class="text-sm text-gray-500 mt-2">Expected CSV format: Name,Email,Route</p>
+                <p class="text-sm text-blue-600 mt-2 font-medium">Expected CSV format: Name,Email,Phone,Class,Branch,Accommodation Type,Bus ID (Bus ID optional)</p>
+                <p class="text-xs text-blue-500 mt-1">🔐 Passwords are automatically generated and emailed to students</p>
+                <p class="text-xs text-blue-500 mt-1">📧 Email credentials sent immediately after processing</p>
+                <p class="text-xs text-blue-500 mt-1">💡 Use this method for adding multiple students efficiently</p>
             </div>
 
-            <div>
-                <h3 class="text-xl font-semibold mb-2">Manually Add Student</h3>
-                <form onsubmit="manuallyAddStudent(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Student Name</label>
-                        <input type="text" id="manualStudentName" required class="w-full p-2 border rounded-md" placeholder="Student Name">
+            <!-- Secondary: Manual Entry -->
+            <div class="border-t pt-4">
+                <h3 class="text-lg font-semibold mb-2 text-gray-700">➕ Manual Entry (Single Student)</h3>
+                <form onsubmit="manuallyAddStudent(event)" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Student Name</label>
+                            <input type="text" id="manualStudentName" required class="w-full p-2 border rounded-md text-sm" placeholder="Student Name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Email</label>
+                            <input type="email" id="manualStudentEmail" required class="w-full p-2 border rounded-md text-sm" placeholder="student@email.com">
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-2">Student Email</label>
-                        <input type="email" id="manualStudentEmail" required class="w-full p-2 border rounded-md" placeholder="student@email.com">
+                        <label class="block text-sm font-medium mb-1">Phone Number</label>
+                        <input type="text" id="manualStudentPhone" required class="w-full p-2 border rounded-md text-sm" placeholder="Phone Number">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Bus Route</label>
-                        <select id="manualBusRoute" class="w-full p-2 border rounded-md">
-                            <option>Route A - Downtown</option>
-                            <option>Route B - Suburbs</option>
-                            <option>Route C - North District</option>
-                            <option>Route D - East Side</option>
-                        </select>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Class</label>
+                            <input type="text" id="manualStudentClass" required class="w-full p-2 border rounded-md text-sm" placeholder="e.g., 10th Grade">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Branch</label>
+                            <input type="text" id="manualStudentBranch" required class="w-full p-2 border rounded-md text-sm" placeholder="e.g., Science">
+                        </div>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                        Add Student Manually
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Accommodation Type</label>
+                            <select id="manualAccommodationType" class="w-full p-2 border rounded-md text-sm">
+                                <option value="Day Scholar">Day Scholar</option>
+                                <option value="Hosteler">Hosteler</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Bus (Optional)</label>
+                            <select id="manualStudentBus" class="w-full p-2 border rounded-md text-sm">
+                                <option value="">No Bus Assigned</option>
+                                <!-- Buses will be loaded dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 font-semibold">
+                        ➕ Add Single Student
                     </button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- Add Driver Modal -->
+    <div id="addDriverModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeAddDriverModal()">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">Add Driver</h2>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Driver Information</h3>
+                <form onsubmit="addDriver(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Driver Name</label>
+                        <input type="text" id="driverName" required class="w-full p-2 border rounded-md" placeholder="Driver Name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="driverEmail" required class="w-full p-2 border rounded-md" placeholder="driver@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="driverPassword" required class="w-full p-2 border rounded-md" placeholder="Password">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Phone Number</label>
+                        <input type="text" id="driverPhone" required class="w-full p-2 border rounded-md" placeholder="Phone Number">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Bus (Optional)</label>
+                        <select id="driverBus" class="w-full p-2 border rounded-md">
+                            <option value="">No Bus Assigned</option>
+                            <!-- Buses will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Status</label>
+                        <select id="driverStatus" class="w-full p-2 border rounded-md">
+                            <option value="permanent">Permanent</option>
+                            <option value="temporary">Temporary</option>
+                            <option value="contract">Contract</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Driver Photo (Optional)</label>
+                        <input type="file" id="driverPhoto" accept="image/*" class="w-full p-2 border rounded-md">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                        Add Driver
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Management Personnel Modal -->
+    <div id="addManagementModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeAddManagementModal()">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">Add Management Personnel</h2>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Management Personnel Information</h3>
+                <form onsubmit="addManagementPersonnel(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Name</label>
+                        <input type="text" id="mgmtName" required class="w-full p-2 border rounded-md" placeholder="Full Name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="mgmtEmail" required class="w-full p-2 border rounded-md" placeholder="management@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="mgmtPassword" required class="w-full p-2 border rounded-md" placeholder="Password">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Phone Number</label>
+                        <input type="text" id="mgmtPhone" required class="w-full p-2 border rounded-md" placeholder="Phone Number">
+                    </div>
+                    <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700">
+                        Add Management Personnel
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Teacher Modal -->
+    <div id="addTeacherModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeAddTeacherModal()">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">Add Teacher</h2>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Teacher Information</h3>
+                <form onsubmit="addTeacher(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Teacher Name</label>
+                        <input type="text" id="teacherName" required class="w-full p-2 border rounded-md" placeholder="Teacher Name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <input type="email" id="teacherEmail" required class="w-full p-2 border rounded-md" placeholder="teacher@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="teacherPassword" required class="w-full p-2 border rounded-md" placeholder="Password">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Class No</label>
+                            <input type="number" id="teacherClassNo" required class="w-full p-2 border rounded-md" placeholder="e.g., 10">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Branch</label>
+                            <input type="text" id="teacherBranch" required class="w-full p-2 border rounded-md" placeholder="e.g., Science">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Semester</label>
+                        <input type="text" id="teacherSem" required class="w-full p-2 border rounded-md" placeholder="e.g., 1st Semester">
+                    </div>
+                    <button type="submit" class="w-full bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700">
+                        Add Teacher
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
     <script>
         // Management Functions
-        function generateBusPassword() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        function generateRandomPassword(length = 8) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
             let password = '';
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < length; i++) {
                 password += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            document.getElementById('busPassword').value = password;
-        }
-
-        function sendBusCredentials(event) {
-            event.preventDefault();
-            const email = document.getElementById('busStudentEmail').value;
-            const name = document.getElementById('busStudentName').value;
-            const route = document.getElementById('busRoute').value;
-            const password = document.getElementById('busPassword').value;
-
-            if (!password) {
-                alert('Please generate a password first!');
-                return;
-            }
-
-            alert(`Bus credentials sent to ${name} (${email})\nRoute: ${route}\nPassword: ${password}\n\nEmail Content:\n"Dear ${name}, your bus login credentials are ready. Use email: ${email} and password: ${password} to access the bus tracking system."`);
-
-            // Clear form
-            document.getElementById('busStudentEmail').value = '';
-            document.getElementById('busStudentName').value = '';
-            document.getElementById('busPassword').value = '';
+            return password;
         }
 
         function viewComplaintDetails(complaint) {
@@ -267,6 +520,7 @@
 
         // Modal Functions
         function openAddStudentModal() {
+            loadBusesForStudent();
             document.getElementById('addStudentModal').style.display = 'flex'; // Changed to 'flex' for centering
         }
 
@@ -276,9 +530,18 @@
 
         // Close modal if clicked outside
         window.onclick = function(event) {
-            const modal = document.getElementById('addStudentModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
+            const studentModal = document.getElementById('addStudentModal');
+            const driverModal = document.getElementById('addDriverModal');
+            const mgmtModal = document.getElementById('addManagementModal');
+
+            if (event.target == studentModal) {
+                studentModal.style.display = 'none';
+            }
+            if (event.target == driverModal) {
+                driverModal.style.display = 'none';
+            }
+            if (event.target == mgmtModal) {
+                mgmtModal.style.display = 'none';
             }
         }
 
@@ -304,50 +567,374 @@
             const lines = csvText.split('\n').filter(line => line.trim() !== '');
             let studentsAdded = 0;
             let errors = [];
+            let emailPromises = [];
 
-            // Assuming CSV format: Name,Email,Route
+            // Expected CSV format: Name,Email,Phone,Class,Branch,Accommodation Type,Bus ID (Bus ID optional)
             for (let i = 0; i < lines.length; i++) {
                 const parts = lines[i].split(',');
-                if (parts.length === 3) {
+                if (parts.length >= 6) { // At least Name,Email,Phone,Class,Branch,Accommodation Type required
                     const name = parts[0].trim();
                     const email = parts[1].trim();
-                    const route = parts[2].trim();
+                    const phone = parts[2].trim();
+                    const studClass = parts[3].trim();
+                    const branch = parts[4].trim();
+                    const accommodationType = parts[5].trim();
+                    const busId = parts[6] ? parts[6].trim() : '';
 
-                    // Here you would typically send this data to a backend server
-                    // For demonstration, we'll just log it and simulate success
-                    console.log(`CSV Student Added: Name: ${name}, Email: ${email}, Route: ${route}`);
-                    studentsAdded++;
+                    // Generate a random password for the student
+                    const password = generateRandomPassword();
+
+                    // Create FormData for this student
+                    const formData = new FormData();
+                    formData.append('name', name);
+                    formData.append('email', email);
+                    formData.append('password', password);
+                    formData.append('phone_no', phone);
+                    formData.append('stud_class', studClass);
+                    formData.append('branch', branch);
+                    formData.append('accommodation_type', accommodationType);
+                    formData.append('bus', busId);
+
+                    // Add the fetch promise to the array
+                    const emailPromise = fetch('{% url "management:add_student" %}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            studentsAdded++;
+                            console.log(`CSV Student Added: ${name} (${email})`);
+                        } else {
+                            errors.push(`Row ${i + 1}: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        errors.push(`Row ${i + 1}: Network error for ${name}`);
+                    });
+
+                    emailPromises.push(emailPromise);
                 } else {
                     errors.push(`Row ${i + 1}: Invalid format - "${lines[i]}"`);
                 }
             }
 
-            let message = `Successfully added ${studentsAdded} students from CSV.`;
-            if (errors.length > 0) {
-                message += `\n\nErrors encountered:\n${errors.join('\n')}`;
-            }
-            alert(message);
-            closeAddStudentModal();
-            // Clear file input
-            document.getElementById('csvFileInput').value = ''; // Corrected to clear the file input
+            // Wait for all email promises to complete
+            Promise.all(emailPromises).then(() => {
+                let message = `Successfully processed ${studentsAdded} students from CSV.`;
+                if (studentsAdded > 0) {
+                    message += `\n\n📧 Student credentials have been sent to all added students.`;
+                }
+                if (errors.length > 0) {
+                    message += `\n\nErrors encountered:\n${errors.join('\n')}`;
+                }
+                alert(message);
+                closeAddStudentModal();
+                // Clear file input
+                document.getElementById('csvFileInput').value = '';
+            });
+        }
+
+        function loadBusesForStudent() {
+            // This would typically fetch buses from the backend
+            // For now, we'll add some sample buses
+            const busSelect = document.getElementById('manualStudentBus');
+            busSelect.innerHTML = '<option value="">No Bus Assigned</option>';
+            // Sample buses - in real implementation, fetch from API
+            const sampleBuses = [
+                {id: 1, bus_no: 'Bus #5'},
+                {id: 2, bus_no: 'Bus #3'},
+                {id: 3, bus_no: 'Bus #7'},
+                {id: 4, bus_no: 'Bus #12'}
+            ];
+            sampleBuses.forEach(bus => {
+                const option = document.createElement('option');
+                option.value = bus.id;
+                option.textContent = bus.bus_no;
+                busSelect.appendChild(option);
+            });
         }
 
         function manuallyAddStudent(event) {
             event.preventDefault();
-            const name = document.getElementById('manualStudentName').value;
-            const email = document.getElementById('manualStudentEmail').value;
-            const route = document.getElementById('manualBusRoute').value;
 
-            // Here you would typically send this data to a backend server
-            // For demonstration, we'll just log it and simulate success
-            alert(`Manually added student:\nName: ${name}\nEmail: ${email}\nRoute: ${route}`);
-            console.log(`Manually Added Student: Name: ${name}, Email: ${email}, Route: ${route}`);
+            // Generate password automatically
+            const generatedPassword = generateRandomPassword();
 
-            // Clear form
-            document.getElementById('manualStudentName').value = '';
-            document.getElementById('manualStudentEmail').value = '';
-            document.getElementById('manualBusRoute').value = 'Route A - Downtown'; // Reset to default option
-            closeAddStudentModal();
+            const formData = new FormData();
+            formData.append('name', document.getElementById('manualStudentName').value);
+            formData.append('email', document.getElementById('manualStudentEmail').value);
+            formData.append('password', generatedPassword); // Use generated password
+            formData.append('phone_no', document.getElementById('manualStudentPhone').value);
+            formData.append('stud_class', document.getElementById('manualStudentClass').value);
+            formData.append('branch', document.getElementById('manualStudentBranch').value);
+            formData.append('accommodation_type', document.getElementById('manualAccommodationType').value);
+            formData.append('bus', document.getElementById('manualStudentBus').value);
+
+            fetch('{% url "management:add_student" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(`${data.message}\n\n📧 Student credentials have been sent to: ${data.student_email}`);
+                    closeAddStudentModal();
+                    // Clear form
+                    document.getElementById('manualStudentName').value = '';
+                    document.getElementById('manualStudentEmail').value = '';
+                    document.getElementById('manualStudentPhone').value = '';
+                    document.getElementById('manualStudentClass').value = '';
+                    document.getElementById('manualStudentBranch').value = '';
+                    document.getElementById('manualAccommodationType').value = 'Day Scholar';
+                    document.getElementById('manualStudentBus').value = '';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the student.');
+            });
+        }
+
+        // Driver Modal Functions
+        function openAddDriverModal() {
+            loadBusesForDriver();
+            document.getElementById('addDriverModal').style.display = 'flex';
+        }
+
+        function closeAddDriverModal() {
+            document.getElementById('addDriverModal').style.display = 'none';
+        }
+
+        function loadBusesForDriver() {
+            // This would typically fetch buses from the backend
+            // For now, we'll add some sample buses
+            const busSelect = document.getElementById('driverBus');
+            busSelect.innerHTML = '<option value="">Select Bus</option>';
+            // Sample buses - in real implementation, fetch from API
+            const sampleBuses = [
+                {id: 1, bus_no: 'Bus #5'},
+                {id: 2, bus_no: 'Bus #3'},
+                {id: 3, bus_no: 'Bus #7'},
+                {id: 4, bus_no: 'Bus #12'}
+            ];
+            sampleBuses.forEach(bus => {
+                const option = document.createElement('option');
+                option.value = bus.id;
+                option.textContent = bus.bus_no;
+                busSelect.appendChild(option);
+            });
+        }
+
+        function addDriver(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('bus_driver', document.getElementById('driverName').value);
+            formData.append('email', document.getElementById('driverEmail').value);
+            formData.append('password', document.getElementById('driverPassword').value);
+            formData.append('ph_no', document.getElementById('driverPhone').value);
+            formData.append('bus_id', document.getElementById('driverBus').value);
+            formData.append('status', document.getElementById('driverStatus').value);
+            const driverPhotoInput = document.getElementById('driverPhoto');
+            if (driverPhotoInput.files.length > 0) {
+                formData.append('bus_photo', driverPhotoInput.files[0]);
+            }
+
+            fetch('{% url "management:add_driver" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    closeAddDriverModal();
+                    // Clear form
+                    document.getElementById('driverName').value = '';
+                    document.getElementById('driverEmail').value = '';
+                    document.getElementById('driverPassword').value = '';
+                    document.getElementById('driverPhone').value = '';
+                    document.getElementById('driverBus').value = '';
+                    document.getElementById('driverStatus').value = 'permanent';
+                    driverPhotoInput.value = '';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the driver.');
+            });
+        }
+
+        // Management Personnel Modal Functions
+        function openAddManagementModal() {
+            document.getElementById('addManagementModal').style.display = 'flex';
+        }
+
+        function closeAddManagementModal() {
+            document.getElementById('addManagementModal').style.display = 'none';
+        }
+
+        function addManagementPersonnel(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('name', document.getElementById('mgmtName').value);
+            formData.append('email', document.getElementById('mgmtEmail').value);
+            formData.append('password', document.getElementById('mgmtPassword').value);
+            formData.append('phone_no', document.getElementById('mgmtPhone').value);
+
+            fetch('{% url "management:add_management_personnel" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    closeAddManagementModal();
+                    // Clear form
+                    document.getElementById('mgmtName').value = '';
+                    document.getElementById('mgmtEmail').value = '';
+                    document.getElementById('mgmtPassword').value = '';
+                    document.getElementById('mgmtPhone').value = '';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding management personnel.');
+            });
+        }
+
+        // CSV Upload Functions
+        function uploadDriverCsv() {
+            const fileInput = document.getElementById('driverCsvFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a CSV file to upload.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csv_file', file);
+
+            fetch('{% url "management:add_driver_csv" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    closeAddDriverModal();
+                    document.getElementById('driverCsvFileInput').value = '';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while uploading the CSV file.');
+            });
+        }
+
+        function uploadMgmtCsv() {
+            const fileInput = document.getElementById('mgmtCsvFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a CSV file to upload.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csv_file', file);
+
+            fetch('{% url "management:add_management_csv" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    closeAddManagementModal();
+                    document.getElementById('mgmtCsvFileInput').value = '';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while uploading the CSV file.');
+            });
+        }
+        // Teacher Modal Functions
+        function openAddTeacherModal() {
+            document.getElementById('addTeacherModal').style.display = 'flex';
+        }
+
+        function closeAddTeacherModal() {
+            document.getElementById('addTeacherModal').style.display = 'none';
+        }
+
+        function addTeacher(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('teacher_name', document.getElementById('teacherName').value);
+            formData.append('email', document.getElementById('teacherEmail').value);
+            formData.append('password', document.getElementById('teacherPassword').value);
+            formData.append('class_no', document.getElementById('teacherClassNo').value);
+            formData.append('branch', document.getElementById('teacherBranch').value);
+            formData.append('sem', document.getElementById('teacherSem').value);
+
+            fetch('{% url "management:add_teacher" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    closeAddTeacherModal();
+                    // Clear form
+                    document.getElementById('teacherName').value = '';
+                    document.getElementById('teacherEmail').value = '';
+                    document.getElementById('teacherPassword').value = '';
+                    document.getElementById('teacherClassNo').value = '';
+                    document.getElementById('teacherBranch').value = '';
+                    document.getElementById('teacherSem').value = '';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the teacher.');
+            });
         }
     </script>
 </body>

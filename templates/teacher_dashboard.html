@@ -7,6 +7,8 @@
     <title>Teacher Dashboard - BusTracker Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{% static 'common_scripts.js' %}"></script>
+
+    {% csrf_token %}
     <script>
     function logout() {
     localStorage.removeItem('currentUserRole'); // Clear stored role
@@ -89,6 +91,10 @@
                                 <option value="absent">Mark as Absent</option>
                             </select>
                         </div>
+                        <div>
+                            <label for="notesOverride" class="block text-sm font-medium mb-2">Notes (Optional)</label>
+                            <textarea id="notesOverride" rows="2" class="w-full p-2 border rounded-md" placeholder="Additional notes about this override..."></textarea>
+                        </div>
                         <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
                             Apply Manual Override
                         </button>
@@ -122,16 +128,52 @@
                     </form>
                 </div>
             </div>
+
+
         </div>
     </div>
 
     <script>
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         // Teacher Dashboard Functions
-        function resolveMissingAlert(studentName) {
-            alert(`Resolving alert for ${studentName}. This would typically update a database and remove the alert from the dashboard.`);
-            // In a real application, you'd send an AJAX request to your backend
-            // and then remove the specific alert div from the DOM.
-            // For demonstration, we'll just show an alert.
+        function resolveMissingAlert(alertId, studentName) {
+            if (confirm(`Are you sure you want to resolve the alert for ${studentName}?`)) {
+                fetch(`{% url "teacher:resolve_alert" 0 %}`.replace('0', alertId), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        loadAlerts(); // Reload alerts
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while resolving the alert.');
+                });
+            }
         }
 
         function manualOverride(event) {
@@ -139,13 +181,40 @@
             const studentName = document.getElementById('studentNameOverride').value;
             const busRoute = document.getElementById('busRouteOverride').value;
             const action = document.getElementById('statusAction').value;
+            const notes = document.getElementById('notesOverride') ? document.getElementById('notesOverride').value : '';
 
-            alert(`Manual override applied:\nStudent: ${studentName}\nBus Route: ${busRoute}\nAction: Marked as ${action}`);
-            // In a real application, this would send data to your backend to update student status.
-            // Clear form
-            document.getElementById('studentNameOverride').value = '';
-            document.getElementById('busRouteOverride').value = 'Route A - Downtown';
-            document.getElementById('statusAction').value = 'boarded';
+            const formData = new FormData();
+            formData.append('student_name', studentName);
+            formData.append('bus_route', busRoute);
+            formData.append('action', action);
+            formData.append('notes', notes);
+
+            fetch('{% url "teacher:manual_override" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    // Clear form
+                    document.getElementById('studentNameOverride').value = '';
+                    document.getElementById('busRouteOverride').value = 'Route A - Downtown';
+                    document.getElementById('statusAction').value = 'boarded';
+                    if (document.getElementById('notesOverride')) {
+                        document.getElementById('notesOverride').value = '';
+                    }
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while applying the manual override.');
+            });
         }
 
         function reportMissingStudent(event) {
@@ -154,37 +223,79 @@
             const busRoute = document.getElementById('reportBusRoute').value;
             const details = document.getElementById('reportDetails').value;
 
-            alert(`Missing student reported:\nStudent: ${studentName}\nBus Route: ${busRoute}\nDetails: ${details}\n\nThis report would be sent to administrators and trigger an emergency protocol.`);
-            // In a real application, this would send data to your backend to log the missing student
-            // and potentially trigger notifications to relevant personnel.
-            // Clear form
-            document.getElementById('reportStudentName').value = '';
-            document.getElementById('reportBusRoute').value = 'Route A - Downtown';
-            document.getElementById('reportDetails').value = '';
+            const formData = new FormData();
+            formData.append('student_name', studentName);
+            formData.append('bus_route', busRoute);
+            formData.append('details', details);
+
+            fetch('{% url "teacher:report_missing" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    loadAlerts(); // Reload alerts to show the new one
+                    // Clear form
+                    document.getElementById('reportStudentName').value = '';
+                    document.getElementById('reportBusRoute').value = 'Route A - Downtown';
+                    document.getElementById('reportDetails').value = '';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while reporting the missing student.');
+            });
         }
 
-        // Example of adding a dynamic alert (can be triggered by backend data)
-        function addMissingStudentAlert(name, bus, lastSeen, contact) {
-            const alertsContainer = document.getElementById('missingStudentAlerts');
-            const newAlert = document.createElement('div');
-            newAlert.className = 'p-4 bg-red-100 border border-red-300 rounded-lg';
-            newAlert.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
-                    <h4 class="font-medium text-red-900">Student Missing: ${name}</h4>
-                    <span class="text-xs text-red-700">${bus}</span>
-                </div>
-                <p class="text-sm text-red-800">${lastSeen}</p>
-                <p class="text-xs text-gray-700">Parent Contact: ${contact}</p>
-                <button onclick="resolveMissingAlert('${name}')" class="mt-2 text-xs bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Resolve Alert</button>
-            `;
-            alertsContainer.prepend(newAlert); // Add to the top
+        // Load alerts from backend
+        function loadAlerts() {
+            fetch('{% url "teacher:get_alerts" %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const alertsContainer = document.getElementById('missingStudentAlerts');
+                    alertsContainer.innerHTML = '';
+
+                    if (data.alerts.length === 0) {
+                        alertsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">No active alerts</p>';
+                        return;
+                    }
+
+                    data.alerts.forEach(alert => {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'p-4 bg-red-100 border border-red-300 rounded-lg';
+                        alertDiv.innerHTML = `
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium text-red-900">Student Missing: ${alert.student_name}</h4>
+                                <span class="text-xs text-red-700">${alert.bus_route}</span>
+                            </div>
+                            <p class="text-sm text-red-800">${alert.last_seen}</p>
+                            <p class="text-xs text-gray-700">Parent Contact: ${alert.parent_contact}</p>
+                            <p class="text-xs text-gray-600">Reported: ${alert.reported_at}</p>
+                            <button onclick="resolveMissingAlert(${alert.id}, '${alert.student_name}')" class="mt-2 text-xs bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Resolve Alert</button>
+                        `;
+                        alertsContainer.appendChild(alertDiv);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading alerts:', error);
+            });
         }
 
-        // You could call addMissingStudentAlert() based on real-time data from your backend.
-        // For demonstration, let's add one after a short delay:
-        // setTimeout(() => {
-        //     addMissingStudentAlert('Alice Wonderland', 'Bus #10 - Route B', 'Did not board at school.', '(555) 123-4567');
-        // }, 3000);
+        // Load alerts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAlerts();
+        });
+
+
 
     </script>
 </body>

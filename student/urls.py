@@ -25,5 +25,8 @@ urlpatterns = [
     path("complaint/",views.submit_complaint,name="complaint"),
     path("dashboard/",views.dashboard,name="dashboard"),
     path("hosteler_reg/",views.bus_registration,name="hosteler_registration"),
-    path("delete-registration/<int:registration_id>/", views.delete_registration, name="delete_registration")
+    path("delete-registration/<int:registration_id>/", views.delete_registration, name="delete_registration"),
+    path("update_password/",views.update_password,name="update_password"),
+    path("forgot_password/", views.forgot_password_request, name="forgot_password_request"),
+    path("reset_password/<uuid:token>/", views.reset_password, name="reset_password"),
 ]

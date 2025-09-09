@@ -18,6 +18,13 @@ from django.urls import path
 from . import views
 app_name='teacher'
 urlpatterns = [
+    path('login/', views.login, name='login'),
     path('',views.dashboard,name="dashboard"),
     path("logout/",views.logout,name="logout"),
+    path('manual-override/', views.manual_override, name='manual_override'),
+    path('report-missing/', views.report_missing_student, name='report_missing'),
+    path('resolve-alert/<int:alert_id>/', views.resolve_alert, name='resolve_alert'),
+    path('get-alerts/', views.get_alerts, name='get_alerts'),
+    path('get-all-bus-locations/', views.get_all_bus_locations, name='get_all_bus_locations'),
+    path('bus_tracking/', views.bus_tracking, name='bus_tracking'),
 ]
