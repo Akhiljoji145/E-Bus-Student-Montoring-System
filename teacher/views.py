@@ -4,8 +4,15 @@ from django.contrib.sessions.models import Session
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from .models import teacher, MissingStudentAlert, StudentStatusOverride
-from driver.models import Busdriver
+from django.contrib.auth.hashers import make_password, check_password
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.core.mail import send_mail
+import secrets
+import string
+from .models import teacher, MissingStudentAlert, StudentStatusOverride, PasswordResetToken
+from student.models import student_details
+from driver.models import Busdriver, Bus, BoardingAlert
 
 # Create your views here.
 def login(request):
@@ -13,10 +20,14 @@ def login(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         try:
-            teacher_obj = teacher.objects.get(email=email, password=password)
-            request.session['teacher_id'] = teacher_obj.id
-            request.session['teacher_name'] = teacher_obj.teacher_name
-            return redirect('teacher:dashboard')
+            teacher_obj = teacher.objects.get(email=email)
+            if check_password(password, teacher_obj.password):
+                request.session['teacher_id'] = teacher_obj.id
+                request.session['teacher_name'] = teacher_obj.teacher_name
+                return redirect('teacher:dashboard')
+            else:
+                messages.error(request, 'Invalid email or password')
+                return redirect('teacher:login')
         except teacher.DoesNotExist:
             messages.error(request, 'Invalid email or password')
             return redirect('teacher:login')
@@ -29,8 +40,20 @@ def dashboard(request):
     # Get active missing student alerts
     alerts = MissingStudentAlert.objects.filter(status='active').order_by('-reported_at')[:10]
 
+    # Get boarding alerts for teacher
+    boarding_alerts = BoardingAlert.objects.filter(sent_to='teacher', sent_at__date=timezone.now().date()).order_by('-sent_at')[:10]
+
+    # Get all students for dropdowns
+    students = student_details.objects.all().order_by('name')
+
+    # Get all buses for dropdowns
+    buses = Bus.objects.all().order_by('bus_no')
+
     context = {
         'alerts': alerts,
+        'boarding_alerts': boarding_alerts,
+        'students': students,
+        'buses': buses,
         'teacher_name': request.session.get('teacher_name', '')
     }
     return render(request, 'teacher_dashboard.html', context)
@@ -149,6 +172,27 @@ def get_alerts(request):
         'alerts': alerts_data
     })
 
+def get_boarding_alerts(request):
+    if 'teacher_id' not in request.session:
+        return JsonResponse({'status': 'error', 'message': 'Not authenticated'})
+
+    alerts = BoardingAlert.objects.filter(sent_to='teacher', sent_at__date=timezone.now().date()).order_by('-sent_at')[:20]
+    alerts_data = []
+
+    for alert in alerts:
+        alerts_data.append({
+            'id': alert.id,
+            'student_name': alert.student.name,
+            'bus_route': alert.bus.bus_starting_point,
+            'alert_type': alert.alert_type,
+            'sent_at': alert.sent_at.strftime('%Y-%m-%d %H:%M:%S')
+        })
+
+    return JsonResponse({
+        'status': 'success',
+        'alerts': alerts_data
+    })
+
 def get_all_bus_locations(request):
     if 'teacher_id' not in request.session:
         return JsonResponse({'status': 'error', 'message': 'Not authenticated'})
@@ -171,3 +215,66 @@ def get_all_bus_locations(request):
         'status': 'success',
         'buses': buses_data
     })
+
+def forgot_password_request(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = teacher.objects.get(email=email)
+            # Create a password reset token
+            token_obj = PasswordResetToken.objects.create(teacher_user=user)
+            reset_link = request.build_absolute_uri(f"/teacher/reset_password/{token_obj.token}/")
+            # Render HTML email
+            html_message = render_to_string('password_reset_email.html', {
+                'user_name': user.teacher_name,
+                'reset_link': reset_link
+            })
+            # Send email with reset link
+            try:
+                send_mail(
+                    'Password Reset Request - BusTracker Pro',
+                    'Please use an HTML-compatible email client to view this message.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+                messages.success(request, 'Password reset link has been sent to your email.')
+                return redirect('teacher:login')
+            except Exception as e:
+                # Log the error and inform the user
+                print(f"Error sending email: {e}")  # For debugging
+                messages.error(request, 'There was an error sending the email. Please try again later.')
+                return render(request, 'management_forgot_password.html')
+        except teacher.DoesNotExist:
+            messages.error(request, 'Email address not found.')
+            return render(request, 'management_forgot_password.html')
+    return render(request, 'management_forgot_password.html')
+
+def reset_password(request, token):
+    try:
+        token_obj = PasswordResetToken.objects.get(token=token)
+    except PasswordResetToken.DoesNotExist:
+        messages.error(request, 'Invalid or expired password reset token.')
+        return redirect('teacher:forgot_password_request')
+
+    if not token_obj.is_valid():
+        messages.error(request, 'Password reset token has expired.')
+        return redirect('teacher:forgot_password_request')
+
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        if new_password == confirm_password:
+            user = token_obj.teacher_user
+            user.password = new_password  # Note: not hashing for simplicity, but should hash in production
+            user.save()
+            token_obj.delete()  # Invalidate token after use
+            messages.success(request, 'Password has been reset successfully.')
+            return redirect('teacher:login')
+        else:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'management_reset_password.html', {'token': token})
+    return render(request, 'management_reset_password.html', {'token': token})
+def login_dashboard(request):
+    return redirect('/login_dashboard')

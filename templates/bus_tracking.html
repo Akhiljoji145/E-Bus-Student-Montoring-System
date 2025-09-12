@@ -18,8 +18,8 @@
                     <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
                 </div>
                 <div class="flex space-x-4">
-                    <button onclick="window.location.href='index.html'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
-                    <button onclick="window.location.href='/dashboard'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Dashboard</button>
+                    <button onclick="window.location.href='{% url 'student:home' %}'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
+                    <button onclick="window.location.href='{% url 'student:login_dashboard' %}'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Dashboard</button>
                     <button id="logoutBtn" onclick="logout()" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors">Logout</button>
                 </div>
             </div>
@@ -36,7 +36,7 @@
     <script>
         function logout() {
             localStorage.removeItem('currentUserRole');
-            window.location.href = '/logout';
+            window.location.href = '{% url 'teacher:logout' %}';
         }
     </script>
 </body>

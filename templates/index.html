@@ -129,9 +129,40 @@
             <div class="max-w-4xl mx-auto text-center px-4">
                 <h2 class="text-4xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
                 <p class="text-xl text-gray-600 mb-8">Join thousands of schools already using BusTracker Pro</p>
-                <button onclick="showSection('login')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-medium transition-colors shadow-lg">
+                <button onclick="window.location.href='{% url "student:login_dashboard" %}'" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-medium transition-colors shadow-lg">
                     Access Your Dashboard
                 </button>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="login-section" class="section">
+            <div class="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-blue-50 to-indigo-100">
+                <div class="max-w-md w-full">
+                    <div class="bg-white rounded-lg shadow-xl p-8">
+                        <div class="text-center mb-8">
+                            <button onclick="showSection('cover')" class="text-indigo-600 hover:text-indigo-700 mb-4 inline-flex items-center">
+                                ← Back to Home
+                            </button>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Access System</h2>
+                            <p class="text-gray-600">Choose your role to login</p>
+                        </div>
+                        <div class="space-y-4">
+                            <a href="{% url 'student:login_dashboard' %}" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-md text-center block transition-colors">
+                                Student Login
+                            </a>
+                            <a href="{% url 'teacher:login' %}" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-md text-center block transition-colors">
+                                Teacher Login
+                            </a>
+                            <a href="{% url 'driver:login' %}" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-md text-center block transition-colors">
+                                Driver Login
+                            </a>
+                            <a href="{% url 'management:login' %}" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-md text-center block transition-colors">
+                                Management Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

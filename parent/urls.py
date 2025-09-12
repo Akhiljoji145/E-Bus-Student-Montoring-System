@@ -20,5 +20,10 @@ from . import views
 app_name='parent'
 urlpatterns = [
     path('',views.dashboard,name="dashboard"),
+    path("login/",views.login,name="login"),
+    path("login_dashboard/", views.login_dashboard, name="login_dashboard"),
     path("logout/",views.logout,name="logout"),
+    path("submit_complaint/", views.submit_complaint, name="submit_complaint"),
+    path('forgot_password/', views.forgot_password_request, name='forgot_password_request'),
+    path('reset_password/<uuid:token>/', views.reset_password, name='reset_password'),
 ]

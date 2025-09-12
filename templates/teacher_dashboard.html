@@ -26,7 +26,7 @@
                         <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
                     </div>
                     <div class="flex space-x-4">
-                        <button onclick="window.location.href='index.html'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
+                        <button onclick="window.location.href='{% url 'student:login_dashboard' %}'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
                         <button id="logoutBtn" onclick="logout()" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors">Logout</button>
                     </div>
                 </div>
@@ -44,43 +44,94 @@
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h3 class="text-xl font-semibold mb-4">🚨 Missing Student Alerts</h3>
                     <div id="missingStudentAlerts" class="space-y-4">
-                        <!-- Alerts will be dynamically added here -->
+                        {% for alert in alerts %}
                         <div class="p-4 bg-red-100 border border-red-300 rounded-lg">
                             <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-red-900">Student Missing: John Doe</h4>
-                                <span class="text-xs text-red-700">Bus #5 - Route A</span>
+                                <h4 class="font-medium text-red-900">Student Missing: {{ alert.student_name }}</h4>
+                                <span class="text-xs text-red-700">{{ alert.bus_route }}</span>
                             </div>
-                            <p class="text-sm text-red-800">Last seen at 8:00 AM at Stop 3. Did not board the bus.</p>
-                            <p class="text-xs text-gray-700">Parent Contact: (123) 456-7890</p>
-                            <button onclick="resolveMissingAlert('John Doe')" class="mt-2 text-xs bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Resolve Alert</button>
+                            <p class="text-sm text-red-800">{{ alert.last_seen }}</p>
+                            <p class="text-xs text-gray-700">Parent Contact: {{ alert.parent_contact }}</p>
+                            <p class="text-xs text-gray-600">Reported: {{ alert.reported_at|date:"Y-m-d H:i:s" }}</p>
+                            <button onclick="resolveMissingAlert({{ alert.id }}, '{{ alert.student_name }}')" class="mt-2 text-xs bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Resolve Alert</button>
                         </div>
-                        <div class="p-4 bg-orange-100 border border-orange-300 rounded-lg">
+                        {% empty %}
+                        <p class="text-gray-500 text-center py-4">No active missing alerts</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Boarding Alerts -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">🚌 Boarding Alerts</h3>
+                    <div id="boardingAlerts" class="space-y-4">
+                        {% for alert in boarding_alerts %}
+                        <div class="p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
                             <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-orange-900">Student Not Departed: Jane Smith</h4>
-                                <span class="text-xs text-orange-700">Bus #2 - Route C</span>
+                                <h4 class="font-medium text-yellow-900">Student {{ alert.alert_type|title }}: {{ alert.student.name }}</h4>
+                                <span class="text-xs text-yellow-700">{{ alert.bus.bus_starting_point }}</span>
                             </div>
-                            <p class="text-sm text-orange-800">Expected to depart at 3:30 PM. Not marked as departed.</p>
-                            <p class="text-xs text-gray-700">Parent Contact: (987) 654-3210</p>
-                            <button onclick="resolveMissingAlert('Jane Smith')" class="mt-2 text-xs bg-orange-700 text-white px-3 py-1 rounded hover:bg-orange-800">Resolve Alert</button>
+                            <p class="text-sm text-yellow-800">Alert sent at {{ alert.sent_at|date:"H:i:s" }}</p>
                         </div>
+                        {% empty %}
+                        <p class="text-gray-500 text-center py-4">No boarding alerts today</p>
+                        {% endfor %}
                     </div>
                 </div>
 
                 <!-- Manual Override for Student Status -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
+                <!-- Report Missing Student -->
+                <div class="bg-white rounded-lg shadow-lg p-6 lg:col-span-1">
+                    <h3 class="text-xl font-semibold mb-4">⚠️ Report a Missing Student</h3>
+                    <form onsubmit="reportMissingStudent(event)" class="space-y-4">
+                        <div>
+                            <label for="reportStudentName" class="block text-sm font-medium mb-2">Student Name</label>
+                            <select id="reportStudentName" required class="w-full p-2 border rounded-md">
+                                <option value="" disabled selected>Select a student</option>
+                                {% for student in students %}
+                                <option value="{{ student.name }}">{{ student.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="reportBusRoute" class="block text-sm font-medium mb-2">Bus Route</label>
+                            <select id="reportBusRoute" class="w-full p-2 border rounded-md" required>
+                                <option value="" disabled selected>Select a bus</option>
+                                {% for bus in buses %}
+                                <option value="Bus #{{ bus.bus_no }} - {{ bus.bus_starting_point }}">Bus #{{ bus.bus_no }} - {{ bus.bus_starting_point }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="reportDetails" class="block text-sm font-medium mb-2">Details / Last Known Location</label>
+                            <textarea id="reportDetails" rows="3" class="w-full p-2 border rounded-md" placeholder="e.g., Did not show up at stop 5, last seen near school gate."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">
+                            Report Missing Student
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Manual Override for Student Status -->
+                <div class="bg-white rounded-lg shadow-lg p-6 lg:col-span-1">
                     <h3 class="text-xl font-semibold mb-4">✍️ Manual Student Status Override</h3>
                     <form onsubmit="manualOverride(event)" class="space-y-4">
                         <div>
                             <label for="studentNameOverride" class="block text-sm font-medium mb-2">Student Name</label>
-                            <input type="text" id="studentNameOverride" required class="w-full p-2 border rounded-md" placeholder="Enter student name">
+                            <select id="studentNameOverride" required class="w-full p-2 border rounded-md">
+                                <option value="" disabled selected>Select a student</option>
+                                {% for student in students %}
+                                <option value="{{ student.name }}">{{ student.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div>
                             <label for="busRouteOverride" class="block text-sm font-medium mb-2">Bus Route</label>
-                            <select id="busRouteOverride" class="w-full p-2 border rounded-md">
-                                <option>Route A - Downtown</option>
-                                <option>Route B - Suburbs</option>
-                                <option>Route C - North District</option>
-                                <option>Route D - East Side</option>
+                            <select id="busRouteOverride" class="w-full p-2 border rounded-md" required>
+                                <option value="" disabled selected>Select a bus</option>
+                                {% for bus in buses %}
+                                <option value="Bus #{{ bus.bus_no }} - {{ bus.bus_starting_point }}">Bus #{{ bus.bus_no }} - {{ bus.bus_starting_point }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div>
@@ -97,33 +148,6 @@
                         </div>
                         <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
                             Apply Manual Override
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Report Missing Student -->
-                <div class="bg-white rounded-lg shadow-lg p-6 col-span-1 lg:col-span-2">
-                    <h3 class="text-xl font-semibold mb-4">⚠️ Report a Missing Student</h3>
-                    <form onsubmit="reportMissingStudent(event)" class="space-y-4">
-                        <div>
-                            <label for="reportStudentName" class="block text-sm font-medium mb-2">Student Name</label>
-                            <input type="text" id="reportStudentName" required class="w-full p-2 border rounded-md" placeholder="Student's full name">
-                        </div>
-                        <div>
-                            <label for="reportBusRoute" class="block text-sm font-medium mb-2">Bus Route</label>
-                            <select id="reportBusRoute" class="w-full p-2 border rounded-md">
-                                <option>Route A - Downtown</option>
-                                <option>Route B - Suburbs</option>
-                                <option>Route C - North District</option>
-                                <option>Route D - East Side</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="reportDetails" class="block text-sm font-medium mb-2">Details / Last Known Location</label>
-                            <textarea id="reportDetails" rows="3" class="w-full p-2 border rounded-md" placeholder="e.g., Did not show up at stop 5, last seen near school gate."></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">
-                            Report Missing Student
                         </button>
                     </form>
                 </div>
@@ -202,7 +226,7 @@
                     alert(data.message);
                     // Clear form
                     document.getElementById('studentNameOverride').value = '';
-                    document.getElementById('busRouteOverride').value = 'Route A - Downtown';
+                    document.getElementById('busRouteOverride').value = '';
                     document.getElementById('statusAction').value = 'boarded';
                     if (document.getElementById('notesOverride')) {
                         document.getElementById('notesOverride').value = '';
@@ -242,7 +266,7 @@
                     loadAlerts(); // Reload alerts to show the new one
                     // Clear form
                     document.getElementById('reportStudentName').value = '';
-                    document.getElementById('reportBusRoute').value = 'Route A - Downtown';
+                    document.getElementById('reportBusRoute').value = '';
                     document.getElementById('reportDetails').value = '';
                 } else {
                     alert('Error: ' + data.message);

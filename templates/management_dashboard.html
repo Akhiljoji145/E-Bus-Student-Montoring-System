@@ -68,7 +68,7 @@
                         <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
                     </div>
                     <div class="flex space-x-4">
-                        <button onclick="window.location.href='index.html'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
+                        <button onclick="window.location.href='{% url 'student:home' %}'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
                         <button id="logoutBtn" onclick="logout()" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors">Logout</button>
                     </div>
                 </div>
@@ -334,7 +334,11 @@
                             <label class="block text-sm font-medium mb-1">Bus (Optional)</label>
                             <select id="manualStudentBus" class="w-full p-2 border rounded-md text-sm">
                                 <option value="">No Bus Assigned</option>
-                                <!-- Buses will be loaded dynamically -->
+                                {% for i in bus %}
+                                <option value="{{ i.id }}">{{ i.bus_no }}</option>
+                                {% empty %}
+                                <option value="">No buses available</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -363,19 +367,19 @@
                         <label class="block text-sm font-medium mb-2">Email</label>
                         <input type="email" id="driverEmail" required class="w-full p-2 border rounded-md" placeholder="driver@email.com">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
-                        <input type="password" id="driverPassword" required class="w-full p-2 border rounded-md" placeholder="Password">
-                    </div>
+
                     <div>
                         <label class="block text-sm font-medium mb-2">Phone Number</label>
                         <input type="text" id="driverPhone" required class="w-full p-2 border rounded-md" placeholder="Phone Number">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-2">Bus (Optional)</label>
-                        <select id="driverBus" class="w-full p-2 border rounded-md">
-                            <option value="">No Bus Assigned</option>
-                            <!-- Buses will be loaded dynamically -->
+                        <label class="block text-sm font-medium mb-2">Bus</label>
+                        <select id="driverBus" class="w-full p-2 border rounded-md" required>
+                            {% for i in bus %}
+                            <option value="{{ i.id }}">{{ i.bus_no }}</option>
+                            {% empty %}
+                            <option value="">No buses available</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div>
@@ -415,10 +419,7 @@
                         <label class="block text-sm font-medium mb-2">Email</label>
                         <input type="email" id="mgmtEmail" required class="w-full p-2 border rounded-md" placeholder="management@email.com">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
-                        <input type="password" id="mgmtPassword" required class="w-full p-2 border rounded-md" placeholder="Password">
-                    </div>
+
                     <div>
                         <label class="block text-sm font-medium mb-2">Phone Number</label>
                         <input type="text" id="mgmtPhone" required class="w-full p-2 border rounded-md" placeholder="Phone Number">
@@ -448,10 +449,7 @@
                         <label class="block text-sm font-medium mb-2">Email</label>
                         <input type="email" id="teacherEmail" required class="w-full p-2 border rounded-md" placeholder="teacher@email.com">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
-                        <input type="password" id="teacherPassword" required class="w-full p-2 border rounded-md" placeholder="Password">
-                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-2">Class No</label>
@@ -640,23 +638,8 @@
         }
 
         function loadBusesForStudent() {
-            // This would typically fetch buses from the backend
-            // For now, we'll add some sample buses
-            const busSelect = document.getElementById('manualStudentBus');
-            busSelect.innerHTML = '<option value="">No Bus Assigned</option>';
-            // Sample buses - in real implementation, fetch from API
-            const sampleBuses = [
-                {id: 1, bus_no: 'Bus #5'},
-                {id: 2, bus_no: 'Bus #3'},
-                {id: 3, bus_no: 'Bus #7'},
-                {id: 4, bus_no: 'Bus #12'}
-            ];
-            sampleBuses.forEach(bus => {
-                const option = document.createElement('option');
-                option.value = bus.id;
-                option.textContent = bus.bus_no;
-                busSelect.appendChild(option);
-            });
+            // Buses are now loaded from the template context
+            // No additional JavaScript loading needed
         }
 
         function manuallyAddStudent(event) {
@@ -716,31 +699,17 @@
         }
 
         function loadBusesForDriver() {
-            // This would typically fetch buses from the backend
-            // For now, we'll add some sample buses
-            const busSelect = document.getElementById('driverBus');
-            busSelect.innerHTML = '<option value="">Select Bus</option>';
-            // Sample buses - in real implementation, fetch from API
-            const sampleBuses = [
-                {id: 1, bus_no: 'Bus #5'},
-                {id: 2, bus_no: 'Bus #3'},
-                {id: 3, bus_no: 'Bus #7'},
-                {id: 4, bus_no: 'Bus #12'}
-            ];
-            sampleBuses.forEach(bus => {
-                const option = document.createElement('option');
-                option.value = bus.id;
-                option.textContent = bus.bus_no;
-                busSelect.appendChild(option);
-            });
+            // Buses are now loaded from the template context
+            // No additional JavaScript loading needed
         }
 
         function addDriver(event) {
             event.preventDefault();
+            const generatedPassword = generateRandomPassword();
             const formData = new FormData();
             formData.append('bus_driver', document.getElementById('driverName').value);
             formData.append('email', document.getElementById('driverEmail').value);
-            formData.append('password', document.getElementById('driverPassword').value);
+            formData.append('password', generatedPassword);
             formData.append('ph_no', document.getElementById('driverPhone').value);
             formData.append('bus_id', document.getElementById('driverBus').value);
             formData.append('status', document.getElementById('driverStatus').value);
@@ -759,12 +728,11 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert(data.message);
+                    alert(`${data.message}\n\n📧 Driver credentials have been sent to: ${data.driver_email}`);
                     closeAddDriverModal();
                     // Clear form
                     document.getElementById('driverName').value = '';
                     document.getElementById('driverEmail').value = '';
-                    document.getElementById('driverPassword').value = '';
                     document.getElementById('driverPhone').value = '';
                     document.getElementById('driverBus').value = '';
                     document.getElementById('driverStatus').value = 'permanent';
@@ -790,10 +758,11 @@
 
         function addManagementPersonnel(event) {
             event.preventDefault();
+            const generatedPassword = generateRandomPassword();
             const formData = new FormData();
             formData.append('name', document.getElementById('mgmtName').value);
             formData.append('email', document.getElementById('mgmtEmail').value);
-            formData.append('password', document.getElementById('mgmtPassword').value);
+            formData.append('password', generatedPassword);
             formData.append('phone_no', document.getElementById('mgmtPhone').value);
 
             fetch('{% url "management:add_management_personnel" %}', {
@@ -806,12 +775,11 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert(data.message);
+                    alert(`${data.message}\n\n📧 Management personnel credentials have been sent to: ${data.mgmt_email}`);
                     closeAddManagementModal();
                     // Clear form
                     document.getElementById('mgmtName').value = '';
                     document.getElementById('mgmtEmail').value = '';
-                    document.getElementById('mgmtPassword').value = '';
                     document.getElementById('mgmtPhone').value = '';
                 } else {
                     alert(data.message);
@@ -900,10 +868,11 @@
 
         function addTeacher(event) {
             event.preventDefault();
+            const generatedPassword = generateRandomPassword();
             const formData = new FormData();
             formData.append('teacher_name', document.getElementById('teacherName').value);
             formData.append('email', document.getElementById('teacherEmail').value);
-            formData.append('password', document.getElementById('teacherPassword').value);
+            formData.append('password', generatedPassword);
             formData.append('class_no', document.getElementById('teacherClassNo').value);
             formData.append('branch', document.getElementById('teacherBranch').value);
             formData.append('sem', document.getElementById('teacherSem').value);
@@ -918,12 +887,11 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert(data.message);
+                    alert(`${data.message}\n\n📧 Teacher credentials have been sent to: ${data.teacher_email}`);
                     closeAddTeacherModal();
                     // Clear form
                     document.getElementById('teacherName').value = '';
                     document.getElementById('teacherEmail').value = '';
-                    document.getElementById('teacherPassword').value = '';
                     document.getElementById('teacherClassNo').value = '';
                     document.getElementById('teacherBranch').value = '';
                     document.getElementById('teacherSem').value = '';

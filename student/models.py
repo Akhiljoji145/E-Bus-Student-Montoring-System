@@ -13,8 +13,17 @@ class student_details(models.Model):
     branch=models.CharField(max_length=50)
     accommodation_type=models.CharField(default='Day Scholar',max_length=50)
     bus=models.ForeignKey(Bus,on_delete=models.CASCADE,null=True,blank=True)
+    parent = models.ForeignKey('parent.parent', on_delete=models.CASCADE, null=True, blank=True)
+    is_boarded = models.BooleanField(default=False)
+    boarding_time = models.DateTimeField(null=True, blank=True)
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        from django.contrib.auth.hashers import make_password
+        if self.password and not self.password.startswith(('pbkdf2_sha256$', 'bcrypt$', 'argon2')):
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
 
 class registery(models.Model):
     FN=models.CharField(max_length=20)

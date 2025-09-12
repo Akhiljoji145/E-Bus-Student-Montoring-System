@@ -45,7 +45,7 @@
             <div id="role-dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 
                 <!-- Admin Card -->
-                <div onclick="showLoginForm('admin')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                <div onclick="window.location.href='{% url "admin_main:dashboard" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent cursor-pointer">
                     <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-user-shield text-red-600 text-2xl"></i>
                     </div>
@@ -57,7 +57,7 @@
                 </div>
 
                 <!-- Management Card -->
-                <div onclick="window.location.href='{% url "management:login" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                <div onclick="window.location.href='{% url "management:login" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent cursor-pointer">
                     <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-bus text-orange-600 text-2xl"></i>
                     </div>
@@ -69,7 +69,7 @@
                 </div>
 
                 <!-- Teacher Card -->
-                <div onclick="showLoginForm('teacher')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                <div onclick="window.location.href='{% url "teacher:login" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent cursor-pointer">
                     <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-chalkboard-teacher text-blue-600 text-2xl"></i>
                     </div>
@@ -81,7 +81,7 @@
                 </div>
 
                 <!-- Parent Card -->
-                <div onclick="showLoginForm('parent')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                <div onclick="window.location.href='{% url "parent:dashboard" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent cursor-pointer">
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-user-friends text-purple-600 text-2xl"></i>
                     </div>
@@ -93,7 +93,7 @@
                 </div>
 
                 <!-- Driver Card -->
-                <div onclick="showLoginForm('driver')" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                <div onclick="window.location.href='{% url "driver:dashboard" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent cursor-pointer">
                     <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="text-green-600 text-2xl"><img src="{% static 'img/wheel.png' %}"></i>
                     </div>
@@ -105,7 +105,7 @@
                 </div>
 
                 <!-- Student Card -->
-                <div onclick="window.location.href='{% url "student:login" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent">
+                <div onclick="window.location.href='{% url "student:login" %}'" class="role-card bg-white rounded-xl shadow-lg p-6 text-center hover:border-indigo-500 border-2 border-transparent cursor-pointer">
                     <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-graduation-cap text-yellow-600 text-2xl"></i>
                     </div>
@@ -124,7 +124,7 @@
                     <button onclick="hideLoginForm()" class="text-indigo-600 hover:text-indigo-700 mb-4 flex items-center">
                         <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
                     </button>
-                    
+
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-user-shield text-red-600 text-2xl"></i>
@@ -150,6 +150,179 @@
                     </form>
                 </div>
 
-                <!-- Similar forms for other roles -->
-                <div id="management-form" class="login-form bg-white rounded-xl shadow-lg p-8I have reviewed the existing login.html file you have on your desktop. It already has a dashboard-style login page where users can select their role by clicking buttons (Admin, Management, Teacher, etc.) and then enter their email and password. The login form validates credentials and redirects to the respective dashboard page for each role.
+                <!-- Teacher Login Form -->
+                <div id="teacher-form" class="login-form bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
+                    <button onclick="window.location.href='{% url "teacher:login" %}'" class="text-indigo-600 hover:text-indigo-700 mb-4 flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                    </button>
+
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-chalkboard-teacher text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">Teacher Login</h3>
+                        <p class="text-gray-600">Sign in to access teacher dashboard</p>
+                    </div>
+
+                    <form onsubmit="handleRoleLogin(event, 'teacher')">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="teacher-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="teacher-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Sign In as Teacher
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Parent Login Form -->
+                <div id="parent-form" class="login-form bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
+                    <button onclick="hideLoginForm()" class="text-indigo-600 hover:text-indigo-700 mb-4 flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                    </button>
+
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-friends text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">Parent Login</h3>
+                        <p class="text-gray-600">Sign in to access parent dashboard</p>
+                    </div>
+
+                    <form onsubmit="handleRoleLogin(event, 'parent')">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="parent-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="parent-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors font-medium">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Sign In as Parent
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Driver Login Form -->
+                <div id="driver-form" class="login-form bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
+                    <button onclick="hideLoginForm()" class="text-indigo-600 hover:text-indigo-700 mb-4 flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+                    </button>
+
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="text-green-600 text-2xl"><img src="{% static 'img/wheel.png' %}"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">Driver Login</h3>
+                        <p class="text-gray-600">Sign in to access driver dashboard</p>
+                    </div>
+
+                    <form onsubmit="handleRoleLogin(event, 'driver')">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="driver-email" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="driver-password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors font-medium">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Sign In as Driver
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLoginForm(role) {
+            document.getElementById('role-dashboard').style.display = 'none';
+            document.getElementById(role + '-form').style.display = 'block';
+        }
+
+        function hideLoginForm() {
+            document.getElementById('role-dashboard').style.display = 'grid';
+            const forms = document.querySelectorAll('.login-form');
+            forms.forEach(form => form.style.display = 'none');
+        }
+
+        function handleRoleLogin(event, role) {
+            event.preventDefault();
+            const email = document.getElementById(role + '-email').value;
+            const password = document.getElementById(role + '-password').value;
+
+            // Simple validation - in real app, this would be server-side
+            if (email && password) {
+                // Store role in localStorage for dashboard access
+                localStorage.setItem('currentUserRole', role);
+                localStorage.setItem('currentUserEmail', email);
+
+                // Redirect to appropriate dashboard
+                switch(role) {
+                    case 'admin':
+                        window.location.href = '{% url "admin_main:dashboard" %}';
+                        break;
+                    case 'management':
+                        window.location.href = '{% url "management:dashboard" %}';
+                        break;
+                    case 'teacher':
+                        window.location.href = '{% url "teacher:dashboard" %}';
+                        break;
+                    case 'parent':
+                        window.location.href = '{% url "parent:dashboard" %}';
+                        break;
+                    case 'driver':
+                        window.location.href = '{% url "driver:dashboard" %}';
+                        break;
+                    case 'student':
+                        window.location.href = '{% url "student:dashboard" %}';
+                        break;
+                }
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+
+        // Check if user is already logged in
+        window.onload = function() {
+            const currentRole = localStorage.getItem('currentUserRole');
+            if (currentRole) {
+                // Redirect to appropriate dashboard
+                switch(currentRole) {
+                    case 'admin':
+                        window.location.href = '{% url "admin_main:dashboard" %}';
+                        break;
+                    case 'management':
+                        window.location.href = '{% url "management:dashboard" %}';
+                        break;
+                    case 'teacher':
+                        window.location.href = '{% url "teacher:dashboard" %}';
+                        break;
+                    case 'parent':
+                        window.location.href = '{% url "parent:dashboard" %}';
+                        break;
+                    case 'driver':
+                        window.location.href = '{% url "driver:dashboard" %}';
+                        break;
+                    case 'student':
+                        window.location.href = '{% url "student:dashboard" %}';
+                        break;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
 

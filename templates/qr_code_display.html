@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code for Bus {{ bus.bus_no }} - BusTracker Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    function logout() {
+        localStorage.removeItem('currentUserRole'); // Clear stored role
+        window.location.href = '{% url "driver:logout" %}'; // Redirect to login page
+    }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-teal-100 min-h-screen font-sans">
+
+    <script>loadDashboardNav();</script>
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="window.location.href='{% url 'driver:dashboard' %}'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Dashboard</button>
+                    <button id="logoutBtn" onclick="logout()" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-xl p-8">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4 text-center">QR Code for Bus {{ bus.bus_no }}</h1>
+            <p class="text-lg text-gray-600 text-center mb-8">Scan this QR code to board the bus.</p>
+
+            <div class="flex justify-center mb-8">
+                <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code for Bus {{ bus.bus_no }}" class="max-w-full h-auto">
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Bus Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-center">
+                        <span class="font-medium text-gray-700 mr-2">Bus Number:</span>
+                        <span class="text-gray-900">{{ bus.bus_no }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="font-medium text-gray-700 mr-2">Starting Point:</span>
+                        <span class="text-gray-900">{{ bus.bus_starting_point }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="font-medium text-gray-700 mr-2">Plate:</span>
+                        <span class="text-gray-900">{{ bus.bus_plate }}</span>
+                    </div>
+                    {% if bus.departure_time %}
+                    <div class="flex items-center">
+                        <span class="font-medium text-gray-700 mr-2">Departure Time:</span>
+                        <span class="text-gray-900">{{ bus.departure_time }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <a href="{% url 'driver:dashboard' %}" class="inline-block bg-indigo-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-indigo-700 transition duration-200 ease-in-out">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,19 +1,21 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import student_details, student_complaints, hosteler_reg, PasswordResetToken
-from driver.models import Bus, Busdriver
+from driver.models import Bus, Busdriver, StudentBoarding, BoardingAlert
+from teacher.models import teacher
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password
 from django.template.loader import render_to_string
-
-# Create your views here
-def home(request):
+def index(request):
     return render(request, 'index.html')
+def home(request):
+    return redirect('student:login_dashboard')
 
-def logindashboard(request):
+def login_dashboard(request):
     return render(request, 'dashboard_login.html')
 
 def login(request):
@@ -23,173 +25,215 @@ def login(request):
         try:
             student = student_details.objects.get(email=email)
             if check_password(password, student.password):
-                bus = Bus.objects.all()
-                complaints = student_complaints.objects.all()
-                hosteler_registration = hosteler_reg.objects.all()
                 request.session['student_id'] = student.id
                 request.session['student_name'] = student.name
-                request.session['student_email'] = student.email
-                request.session['student_class'] = student.stud_class
-                request.session['student_branch'] = student.branch
-                request.session['accommodation_type'] = student.accommodation_type
-                return render(request, 'student_dashboard.html', {'student': student, 'bus': bus, 'complaints': complaints, 'hosteler_reg': hosteler_registration})
+                return redirect('student:dashboard')
             else:
                 messages.error(request, 'Invalid email or password')
-                return render(request, 'student_login.html')
         except student_details.DoesNotExist:
             messages.error(request, 'Invalid email or password')
-            return render(request, 'student_login.html')
     return render(request, 'student_login.html')
 
 def logout(request):
-    # Clear session
-    if 'student_id' in request.session:
-        del request.session['student_id']
-    if 'student_name' in request.session:
-        del request.session['student_name']
-    if 'student_email' in request.session:
-        del request.session['student_email']
-    if 'student_class' in request.session:
-        del request.session['student_class']
-    if 'student_branch' in request.session:
-        del request.session['student_branch']
-    if 'accommodation_type' in request.session:
-        del request.session['accommodation_type']
-    
-    return redirect('/login')
-
-def submit_complaint(request):
-    if request.method == "POST":
-        student_id = request.POST.get('id')
-        bus = request.POST.get('bus_id')
-        comp = request.POST.get('complaint')
-        complaints = student_complaints(student_id=student_id, bus=bus, complaint=comp)
-        complaints.save()
-        return redirect('/dashboard')
-
-def dashboard(request):
-    if 'student_id' in request.session:
-        student_id = request.session['student_id']
-        student = student_details.objects.get(id=student_id)
-        if student.password == '':
-            messages.info(request, 'Please update your password')
-            return redirect('/update_password')
-        bus = Bus.objects.all()
-        complaints = student_complaints.objects.all()
-        hosteler_registration = hosteler_reg.objects.all()
-        # Check existing bus registrations
-        
-        return render(request, 'student_dashboard.html', {
-            'student': student,
-            'bus': bus,
-            'complaints': complaints,
-            'hosteler_reg': hosteler_registration,
-        })
-    else:
-        return redirect('/login')
+    request.session.flush()
+    return redirect('student:login')
 
 def bus_registration(request):
     if request.method == 'POST':
-        student = request.session['student_id']
-        student_instance = student_details.objects.get(id=student)
-        bus_time = request.POST.get('bus_time')
+        student_id = request.session.get('student_id')
+        bus_id = request.POST.get('bus_id')
+        pickup_time = request.POST.get('pickup_time')
         pickup_point = request.POST.get('pickup_point')
+        if student_id and bus_id and pickup_time and pickup_point:
+            from .models import hosteler_reg
+            from driver.models import Bus
+            try:
+                student = student_details.objects.get(id=student_id)
+                bus = Bus.objects.get(id=bus_id)
+                hosteler_reg.objects.create(
+                    student_id=student,
+                    bus=bus,
+                    pickup_time=pickup_time,
+                    pickup_point=pickup_point,
+                    status='registered'
+                )
+                messages.success(request, 'Bus registration successful')
+            except Exception as e:
+                messages.error(request, f'Error during registration: {str(e)}')
+        else:
+            messages.error(request, 'Please fill in all fields')
+        return redirect('student:dashboard')
+    else:
+        from driver.models import Bus
+        buses = Bus.objects.all()
+        return render(request, 'hosteler_registration.html', {'buses': buses})
+
+def dashboard(request):
+    if 'student_id' not in request.session:
+        return redirect('student:login')
+    student_id = request.session['student_id']
+    student = student_details.objects.get(id=student_id)
+    context = {
+        'student': student,
+    }
+    return render(request, 'student_dashboard.html', context)
+
+def submit_complaint(request):
+    if request.method == 'POST':
+        student_id = request.session.get('student_id')
+        complaint = request.POST.get('complaint')
         bus = request.POST.get('bus')
-        bus_instance = Bus.objects.get(bus_no=bus)
-        bus_no = bus_instance.bus_no
-        reg = hosteler_reg(student_id=student_instance, pickup_time=bus_time, pickup_point=pickup_point, bus=bus_instance, status='Pending')
-        reg.save()
-        return redirect('/dashboard')
+        if student_id and complaint:
+            student_complaints.objects.create(
+                student_id=student_id,
+                complaint=complaint,
+                bus=bus
+            )
+            messages.success(request, 'Complaint submitted successfully')
+        else:
+            messages.error(request, 'Please fill in all fields')
+    return redirect('student:dashboard')
 
 def delete_registration(request, registration_id):
-    if request.method == 'DELETE':
+    if request.method == 'POST':
+        student_id = request.session.get('student_id')
         try:
-            registration = hosteler_reg.objects.get(id=registration_id)
+            registration = hosteler_reg.objects.get(id=registration_id, student_id_id=student_id)
             registration.delete()
-            return JsonResponse({'status': 'success', 'message': 'Registration deleted successfully'})
+            messages.success(request, 'Registration deleted successfully')
         except hosteler_reg.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Registration not found'}, status=404)
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+            messages.error(request, 'Registration not found')
+    return redirect('student:dashboard')
 
 def update_password(request):
-    # This view is for logged-in users to update their password
-    if 'student_id' in request.session:
-        student_id = request.session['student_id']
-        student = student_details.objects.get(id=student_id)
-        if request.method == 'POST':
-            new_password = request.POST.get('new_password')
-            confirm_password = request.POST.get('confirm_password')
-            if new_password == confirm_password:
+    if request.method == 'POST':
+        student_id = request.session.get('student_id')
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        if new_password != confirm_password:
+            messages.error(request, 'New passwords do not match')
+            return redirect('student:update_password')
+        try:
+            student = student_details.objects.get(id=student_id)
+            if check_password(old_password, student.password):
                 student.password = make_password(new_password)
                 student.save()
                 messages.success(request, 'Password updated successfully')
-                return redirect('/dashboard')
             else:
-                messages.error(request, 'Passwords do not match')
-                return render(request, 'student_password.html', {'student': student})
-        return render(request, 'student_password.html', {'student': student})
-    else:
-        return redirect('/login')
+                messages.error(request, 'Old password is incorrect')
+        except student_details.DoesNotExist:
+            messages.error(request, 'Student not found')
+    return redirect('student:dashboard')
 
 def forgot_password_request(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         try:
-            user = student_details.objects.get(email=email)
-            # Create a password reset token
-            token_obj = PasswordResetToken.objects.create(student=user)
-            reset_link = request.build_absolute_uri(f"/reset_password/{token_obj.token}/")
-            # Render HTML email
-            html_message = render_to_string('password_reset_email.html', {
-                'user_name': user.name,
-                'reset_link': reset_link
-            })
-            # Send email with reset link
-            try:
-                send_mail(
-                    'Password Reset Request - BusTracker Pro',
-                    'Please use an HTML-compatible email client to view this message.',
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    html_message=html_message,
-                    fail_silently=False,
-                )
-                messages.success(request, 'Password reset link has been sent to your email.')
-                return redirect('student:login')
-            except Exception as e:
-                # Log the error and inform the user
-                print(f"Error sending email: {e}")  # For debugging
-                messages.error(request, 'There was an error sending the email. Please try again later.')
-                return render(request, 'forgot_password.html')
+            student = student_details.objects.get(email=email)
+            token = PasswordResetToken.objects.create(student=student)
+            reset_link = f"http://127.0.0.1:8000/student/reset_password/{token.token}/"
+            send_mail(
+                'Password Reset Request',
+                f'Hi {student.name},\n\nClick the link below to reset your password:\n{reset_link}\n\nIf you didn\'t request this, ignore this email.',
+                'noreply@schoolbus.com',
+                [student.email]
+            )
+            messages.success(request, 'Password reset link sent to your email')
         except student_details.DoesNotExist:
-            messages.error(request, 'Email address not found.')
-            return render(request, 'forgot_password.html')
+            messages.error(request, 'Email not found')
     return render(request, 'forgot_password.html')
 
 def reset_password(request, token):
     try:
-        token_obj = PasswordResetToken.objects.get(token=token)
-    except PasswordResetToken.DoesNotExist:
-        messages.error(request, 'Invalid or expired password reset token.')
-        return redirect('student:forgot_password_request')
-
-    if not token_obj.is_valid():
-        messages.error(request, 'Password reset token has expired.')
-        return redirect('student:forgot_password_request')
-
-    if request.method == 'POST':
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-        if new_password == confirm_password:
-            user = token_obj.student
-            user.password = make_password(new_password)
-            user.save()
-            token_obj.delete()  # Invalidate token after use
-            messages.success(request, 'Password has been reset successfully.')
+        reset_token = PasswordResetToken.objects.get(token=token)
+        if not reset_token.is_valid():
+            messages.error(request, 'Token has expired')
+            return redirect('student:forgot_password_request')
+        if request.method == 'POST':
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            if new_password != confirm_password:
+                messages.error(request, 'Passwords do not match')
+                return redirect('student:reset_password', token=token)
+            student = reset_token.student
+            student.password = make_password(new_password)
+            student.save()
+            reset_token.delete()
+            messages.success(request, 'Password reset successfully')
             return redirect('student:login')
-        else:
-            messages.error(request, 'Passwords do not match.')
-            return render(request, 'reset_password.html', {'token': token})
-    return render(request, 'reset_password.html', {'token': token})
+        return render(request, 'reset_password.html')
+    except PasswordResetToken.DoesNotExist:
+        messages.error(request, 'Invalid token')
+        return redirect('student:forgot_password_request')
+
+# Existing views omitted for brevity...
+
+def qr_scan(request):
+    # Render the QR code scanning interface page
+    student_id = request.session.get('student_id')
+    return render(request, 'qr_scan.html', {'student_id': student_id})
+
+@csrf_exempt
+def handle_boarding(request, bus_id):
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        if not student_id or not student_id.isdigit():
+            return JsonResponse({'status': 'error', 'message': 'Invalid student ID'})
+        try:
+            student = student_details.objects.get(id=int(student_id))
+            bus = Bus.objects.get(id=bus_id)
+            today = timezone.now().date()
+            # Check if student is registered for this bus (day scholar or hosteler)
+            is_registered = student.bus == bus or hosteler_reg.objects.filter(student_id=student, bus=bus.bus_no).exists()
+            if is_registered:
+                boarding, created = StudentBoarding.objects.get_or_create(
+                    student=student,
+                    bus=bus,
+                    date=today,
+                    defaults={'status': 'boarded', 'time': timezone.now().time()}
+                )
+                if created:
+                    message = 'You are boarded successfully'
+                else:
+                    if boarding.status == 'boarded':
+                        message = 'You are already boarded'
+                    elif boarding.status == 'departed':
+                        message = 'You are departed successfully'
+                    else:
+                        # Update to boarded if not boarded
+                        boarding.status = 'boarded'
+                        boarding.time = timezone.now().time()
+                        boarding.save()
+                        message = 'You are boarded successfully'
+                # Send alert to teacher
+                BoardingAlert.objects.create(
+                    student=student,
+                    bus=bus,
+                    alert_type='boarded',
+                    sent_to='teacher'
+                )
+                # Send alert to teachers related to student's class and branch
+                related_teachers = teacher.objects.filter(class_no=student.stud_class, branch=student.branch)
+                for t in related_teachers:
+                    BoardingAlert.objects.create(
+                        student=student,
+                        bus=bus,
+                        alert_type='boarded',
+                        sent_to='teacher'
+                    )
+                return JsonResponse({'status': 'success', 'message': message})
+            else:
+                # Student not registered for this bus, alert driver
+                BoardingAlert.objects.create(
+                    student=student,
+                    bus=bus,
+                    alert_type='unregistered',
+                    sent_to='driver'
+                )
+                return JsonResponse({'status': 'error', 'message': 'Student not registered for this bus'})
+        except student_details.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Student not found'})
+        except Bus.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Bus not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})

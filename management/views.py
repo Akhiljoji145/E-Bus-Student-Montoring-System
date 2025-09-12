@@ -62,6 +62,7 @@ def dashboard(request):
             'pending_complaints': pending_complaints,
             'recent_complaints': recent_complaints,
             'bus_status': bus_status,
+            'bus': buses,
             'user_name': request.session.get('management_user_name', 'Management User')
         }
         return render(request, 'management_dashboard.html', context)
@@ -107,7 +108,7 @@ def logout(request):
     return redirect('management:login')
 
 def login_dashboard(request):
-    return render(request, 'management_login.html')
+    return redirect('/login_dashboard')
 
 def forgot_password_request(request):
     if request.method == 'POST':
@@ -244,7 +245,7 @@ def add_driver(request):
         driver = Busdriver(
             bus_driver=bus_driver,
             email=email,
-            password=password,
+            password=make_password(password),
             ph_no=ph_no,
             bus_id=bus,
             status=status,

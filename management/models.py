@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password
 import uuid
 from django.utils import timezone
 from datetime import timedelta
@@ -11,6 +12,11 @@ class management(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.password and not self.password.startswith(('pbkdf2_sha256$', 'bcrypt$', 'argon2')):
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
 
 class PasswordResetToken(models.Model):
     management_user = models.ForeignKey(management, on_delete=models.CASCADE)

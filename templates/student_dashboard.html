@@ -56,7 +56,8 @@
                         <div class="text-2xl font-bold text-indigo-600">🚌 BusTracker Pro</div>
                     </div>
                     <div class="flex space-x-4">
-                        <button onclick="window.location.href='index.html'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
+                        <button onclick="window.location.href='{% url 'student:login_dashboard' %}'" class="px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors">Home</button>
+                        <button onclick="window.location.href='{% url 'student:qr_scan' %}'" class="px-4 py-2 text-blue-600 hover:text-blue-700 transition-colors">Scan QR Code</button>
                         <button id="logoutBtn" onclick="logout()" class="px-4 py-2 text-red-600 hover:text-red-700 transition-colors">Logout</button>
                     </div>
                 </div>
@@ -70,6 +71,15 @@
             </div>
 
  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+    <!-- Boarding Status -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-xl font-semibold mb-4">🚍 Boarding Status</h3>
+        <p class="text-gray-600">Scan QR code at the bus to board.</p>
+        <button onclick="window.location.href='{% url 'student:qr_scan' %}'" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 mt-4">
+            Scan QR Code to Board
+        </button>
+    </div>
 
     {% if student.accommodation_type == "Hosteler" %}
     <!-- Bus Registration for Hostelers -->

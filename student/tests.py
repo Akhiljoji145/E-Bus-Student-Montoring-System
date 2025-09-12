@@ -1,69 +1,37 @@
-from django.test import TestCase
-from .models import student_details, student_complaints, hosteler_reg
+from django.test import TestCase, Client
+from django.urls import reverse
+from driver.models import Bus, Busdriver, StudentBoarding, BoardingAlert
+from student.models import student_details
+from django.utils import timezone
 
-class StudentModelTests(TestCase):
+class BoardingTestCase(TestCase):
     def setUp(self):
-        self.student = student_details.objects.create(
-            name="John Doe",
-            email="john@example.com",
-            password="password123",
-            phone_no="1234567890",
-            stud_class="10th",
-            branch="Science"
-        )
-
-    def test_student_creation(self):
-        self.assertEqual(self.student.name, "John Doe")
-        self.assertEqual(self.student.email, "john@example.com")
-
-from django.contrib.auth import get_user_model
-from django.test import LiveServerTestCase
-
-class StudentViewsTests(LiveServerTestCase):
-    def setUp(self):
-        self.student = student_details.objects.create(
-            name="John Doe",
-            email="john@example.com",
-            password="password123",
-            phone_no="1234567890",
-            stud_class="10th",
-            branch="Science"
-        )
-
-    def test_login_view(self):
-        response = self.client.post('/login/', {'email': 'john@example.com', 'password': 'password123'})
+        self.client = Client()
+        self.bus = Bus.objects.create(bus_no=101, bus_starting_point='Start', bus_plate='ABC123')
+        self.student = student_details.objects.create(name='Test Student', email='test@student.com', password='pbkdf2_sha256$dummy', bus=self.bus, stud_class='10', branch='A')
+        self.busdriver = Busdriver.objects.create(bus_driver='Driver1', email='driver1@example.com', password='pbkdf2_sha256$dummy', ph_no='1234567890', bus_id=self.bus)
+    
+    def test_qr_scan_page(self):
+        response = self.client.get(reverse('student:qr_scan'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "student_dashboard.html")
+        self.assertContains(response, 'Scan QR Code')
 
-    def test_logout_view(self):
-        self.client.login(email='john@example.com', password='password123')
-        response = self.client.get('/logout/')
-        self.assertRedirects(response, '/login/')
-
-    def test_submit_complaint_view(self):
-        response = self.client.post('/submit_complaint/', {'id': self.student.id, 'bus_id': 'Bus1', 'complaint': 'Test complaint'})
-        self.assertRedirects(response, '/dashboard/')
-        self.assertTrue(student_complaints.objects.filter(student_id=self.student.id).exists())
-
-    def test_dashboard_view(self):
-        self.client.login(email='john@example.com', password='password123')
-        response = self.client.get('/dashboard/')
+    def test_handle_boarding_registered_student(self):
+        url = reverse('student:handle_boarding', args=[self.bus.id])
+        response = self.client.post(url, {'student_id': self.student.id})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "student_dashboard.html")
-        
-    def test_live_login(self):
-        # Test login via live server
-        response = self.client.post(self.live_server_url + '/login/', {'email': 'john@example.com', 'password': 'password123'})
-        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Boarding Successful!')
+        boarding = StudentBoarding.objects.filter(student=self.student, bus=self.bus, date=timezone.now().date()).first()
+        self.assertIsNotNone(boarding)
+        self.assertEqual(boarding.status, 'boarded')
+        alert = BoardingAlert.objects.filter(student=self.student, bus=self.bus, alert_type='boarded', sent_to='teacher').exists()
+        self.assertTrue(alert)
 
-    def test_live_dashboard(self):
-        self.client.login(email='john@example.com', password='password123')
-        response = self.client.get(self.live_server_url + '/dashboard/')
+    def test_handle_boarding_unregistered_student(self):
+        other_bus = Bus.objects.create(bus_no=102, bus_starting_point='Other', bus_plate='XYZ789')
+        url = reverse('student:handle_boarding', args=[other_bus.id])
+        response = self.client.post(url, {'student_id': self.student.id})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "student_dashboard.html")
-        
-    def test_live_submit_complaint(self):
-        self.client.login(email='john@example.com', password='password123')
-        response = self.client.post(self.live_server_url + '/submit_complaint/', {'id': self.student.id, 'bus_id': 'Bus1', 'complaint': 'Test complaint'})
-        self.assertRedirects(response, self.live_server_url + '/dashboard/')
-        self.assertTrue(student_complaints.objects.filter(student_id=self.student.id).exists())
+        self.assertContains(response, 'Student not registered for this bus')
+        alert = BoardingAlert.objects.filter(student=self.student, bus=other_bus, alert_type='unregistered', sent_to='driver').exists()
+        self.assertTrue(alert)

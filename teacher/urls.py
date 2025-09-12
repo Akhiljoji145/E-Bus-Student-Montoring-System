@@ -19,12 +19,14 @@ from . import views
 app_name='teacher'
 urlpatterns = [
     path('login/', views.login, name='login'),
+    path('login_dashboard/', views.login_dashboard, name='login_dashboard'),
     path('',views.dashboard,name="dashboard"),
     path("logout/",views.logout,name="logout"),
     path('manual-override/', views.manual_override, name='manual_override'),
     path('report-missing/', views.report_missing_student, name='report_missing'),
     path('resolve-alert/<int:alert_id>/', views.resolve_alert, name='resolve_alert'),
     path('get-alerts/', views.get_alerts, name='get_alerts'),
-    path('get-all-bus-locations/', views.get_all_bus_locations, name='get_all_bus_locations'),
-    path('bus_tracking/', views.bus_tracking, name='bus_tracking'),
+    path('get-boarding-alerts/', views.get_boarding_alerts, name='get_boarding_alerts'),
+    path('forgot_password/', views.forgot_password_request, name='forgot_password_request'),
+    path('reset_password/<uuid:token>/', views.reset_password, name='reset_password'),
 ]

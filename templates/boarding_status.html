@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Boarding Status</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Boarding Status</h1>
+    <div id="status">
+        {% if status == 'success' %}
+            <h2 class="success">Boarding Successful!</h2>
+            <p>You have been successfully boarded on the bus.</p>
+        {% else %}
+            <h2 class="error">Boarding Failed</h2>
+            <p>{{ message }}</p>
+        {% endif %}
+    </div>
+    <a href="{% url 'student:dashboard' %}">Back to Dashboard</a>
+</body>
+</html>

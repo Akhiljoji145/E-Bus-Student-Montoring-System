@@ -19,4 +19,12 @@ from . import views
 app_name='driver'
 urlpatterns = [
     path('login/', views.login, name='login'),
+    path('login_dashboard/', views.login_dashboard, name='login_dashboard'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('logout/', views.logout, name='logout'),
+    path('mark_student_boarded/<int:student_id>/', views.mark_student_boarded, name='mark_student_boarded'),
+    path('send_bus_change_message/', views.send_bus_change_message, name='send_bus_change_message'),
+    path('validate_departure/', views.validate_departure, name='validate_departure'),
+    path('unregistered_alert/', views.unregistered_alert, name='unregistered_alert'),
+    path('generate_qr_code/<int:bus_id>/', views.generate_qr_code, name='generate_qr_code'),
 ]

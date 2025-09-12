@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver Alerts</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .alert { background-color: #f44336; color: white; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .alert.success { background-color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <h1>Driver Alerts for Unregistered Students</h1>
+    <div id="alerts">
+        {% for alert in alerts %}
+            <div class="alert">
+                <strong>Alert:</strong> Student {{ alert.student.name }} attempted to board bus {{ alert.bus.bus_no }} but is not registered.
+                <br>
+                <small>Time: {{ alert.sent_at }}</small>
+            </div>
+        {% empty %}
+            <p>No alerts at this time.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Audio element for sound alert -->
+    <audio id="alertSound" src="/static/alert.mp3" preload="auto"></audio>
+
+    <script>
+        // Function to play sound on new alert
+        function playAlertSound() {
+            var audio = document.getElementById('alertSound');
+            audio.play();
+        }
+
+        // Check for new alerts every 10 seconds
+        setInterval(function() {
+            fetch('/driver/unregistered_alert/')
+                .then(response => response.text())
+                .then(data => {
+                    // Update alerts section if new alerts are found
+                    // This is a simple implementation; you may need to parse the HTML or use AJAX properly
+                    if (data.includes('alert')) {
+                        playAlertSound();
+                        location.reload(); // Simple reload for now
+                    }
+                });
+        }, 10000);
+    </script>
+</body>
+</html>

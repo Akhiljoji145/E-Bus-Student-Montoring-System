@@ -21,5 +21,11 @@ from . import views
 app_name='admin_main'
 urlpatterns = [
     path('',views.dashboard,name="dashboard"),
+    path("login/",views.login,name="login"),
+    path('login_dashboard/', views.login_dashboard, name='login_dashboard'),
     path("logout/",views.logout,name="logout"),
+    path('forgot_password/', views.forgot_password_request, name='forgot_password_request'),
+    path('reset_password/<str:token>/', views.reset_password, name='reset_password'),
+    path('delete_user/', views.delete_user, name='delete_user'),
+    path('update_user/', views.update_user, name='update_user'),
 ]

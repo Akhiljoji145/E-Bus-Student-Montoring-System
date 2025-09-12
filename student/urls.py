@@ -18,8 +18,8 @@ from django.urls import path
 from . import views
 app_name='student'
 urlpatterns = [
-    path("",views.home,name="home"),
-    path("login_dashboard/",views.logindashboard,name="login_dashboard"),
+    path("",views.index,name="index"),
+    path("login_dashboard/",views.login_dashboard,name="login_dashboard"),
     path("login/",views.login,name="login"),
     path("logout/",views.logout,name="logout"),
     path("complaint/",views.submit_complaint,name="complaint"),
@@ -29,4 +29,6 @@ urlpatterns = [
     path("update_password/",views.update_password,name="update_password"),
     path("forgot_password/", views.forgot_password_request, name="forgot_password_request"),
     path("reset_password/<uuid:token>/", views.reset_password, name="reset_password"),
+    path("qr_scan/", views.qr_scan, name="qr_scan"),
+    path("handle_boarding/<int:bus_id>/", views.handle_boarding, name="handle_boarding"),
 ]
