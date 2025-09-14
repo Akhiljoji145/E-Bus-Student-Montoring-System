@@ -57,16 +57,33 @@
         function onScanSuccess(decodedText, decodedResult) {
             // Handle the scanned code as you like, for example:
             document.getElementById('result').innerHTML = `<span class="text-blue-600">Scanned: ${decodedText}</span>`;
-            // Assuming decodedText contains the URL for handle_boarding
-            // Send POST request to handle_boarding URL
-            fetch(decodedText, {
+            // Get current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    // Send POST request to handle_boarding URL with location
+                    sendBoardingRequest(decodedText, latitude, longitude);
+                }, function(error) {
+                    console.error('Error getting location:', error);
+                    document.getElementById('result').innerHTML = `<span class="text-red-600 font-semibold">Error getting location. Please enable location services.</span>`;
+                });
+            } else {
+                document.getElementById('result').innerHTML = `<span class="text-red-600 font-semibold">Geolocation is not supported by this browser.</span>`;
+            }
+        }
+
+        function sendBoardingRequest(url, latitude, longitude) {
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRFToken': getCookie('csrftoken')  // Include CSRF token
                 },
                 body: new URLSearchParams({
-                    'student_id': getStudentId() // Get logged in student id
+                    'student_id': getStudentId(), // Get logged in student id
+                    'latitude': latitude,
+                    'longitude': longitude
                 })
             })
             .then(response => response.json())

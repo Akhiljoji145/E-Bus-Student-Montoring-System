@@ -10,6 +10,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password
 from django.template.loader import render_to_string
+import pytz
+from datetime import datetime
 def index(request):
     return render(request, 'index.html')
 def home(request):
@@ -178,34 +180,59 @@ def qr_scan(request):
 def handle_boarding(request, bus_id):
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
         if not student_id or not student_id.isdigit():
             return JsonResponse({'status': 'error', 'message': 'Invalid student ID'})
         try:
             student = student_details.objects.get(id=int(student_id))
             bus = Bus.objects.get(id=bus_id)
             today = timezone.now().date()
+            current_time = timezone.now().time()
+            ist_tz = pytz.timezone('Asia/Kolkata')
+            current_time_ist = timezone.now().astimezone(ist_tz).time()
+
+            # Define scanning time windows
+            morning_start = datetime.strptime('05:00:00', '%H:%M:%S').time()
+            morning_end = datetime.strptime('10:00:00', '%H:%M:%S').time()
+            evening_start = datetime.strptime('15:45:00', '%H:%M:%S').time()
+            evening_end = datetime.strptime('20:00:00', '%H:%M:%S').time()
+
+            # Check if current time is within allowed scanning windows
+            if morning_start <= current_time_ist <= morning_end:
+                is_morning_scan = True
+            elif evening_start <= current_time_ist <= evening_end:
+                is_morning_scan = False
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Scanning not allowed at this time'})
+
             # Check if student is registered for this bus (day scholar or hosteler)
             is_registered = student.bus == bus or hosteler_reg.objects.filter(student_id=student, bus=bus.bus_no).exists()
+
             if is_registered:
+                # Get or create boarding record for today
                 boarding, created = StudentBoarding.objects.get_or_create(
                     student=student,
                     bus=bus,
                     date=today,
-                    defaults={'status': 'boarded', 'time': timezone.now().time()}
                 )
-                if created:
-                    message = 'You are boarded successfully'
+                if is_morning_scan:
+                    boarding.morning_scan = True
+                    if latitude and longitude:
+                        boarding.morning_latitude = latitude
+                        boarding.morning_longitude = longitude
                 else:
-                    if boarding.status == 'boarded':
-                        message = 'You are already boarded'
-                    elif boarding.status == 'departed':
-                        message = 'You are departed successfully'
-                    else:
-                        # Update to boarded if not boarded
-                        boarding.status = 'boarded'
-                        boarding.time = timezone.now().time()
-                        boarding.save()
-                        message = 'You are boarded successfully'
+                    boarding.evening_scan = True
+                    if latitude and longitude:
+                        boarding.evening_latitude = latitude
+                        boarding.evening_longitude = longitude
+
+                boarding.status = 'boarded'
+                boarding.time = timezone.now().time()
+                boarding.save()
+
+                message = f'You are boarded successfully for {"morning" if is_morning_scan else "evening"} session'
+
                 # Send alert to teacher
                 BoardingAlert.objects.create(
                     student=student,

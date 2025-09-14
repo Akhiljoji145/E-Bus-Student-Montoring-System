@@ -50,7 +50,7 @@
                                 <h4 class="font-medium text-yellow-800">Student Not Boarded: {{ alert.student.name }}</h4>
                                 <span class="text-xs text-yellow-600">{{ alert.student.pickup_point }}</span>
                             </div>
-                            <p class="text-sm text-yellow-700">Expected to board. Not scanned.</p>
+                            <p class="text-sm text-yellow-700">Expected to board. Not scanned for {{ alert.alert_type|replace:"not_boarded_morning","morning"|replace:"not_boarded_evening","evening" }} session.</p>
                             <p class="text-xs text-gray-600">Action: Check surroundings, contact school if necessary.</p>
                             <button onclick="markStudentBoarded({{ alert.student.id }})" class="mt-2 text-xs bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700">Mark Boarded (Manual)</button>
                         </div>
@@ -102,8 +102,21 @@
                         <div class="flex justify-between items-center p-2 {% if student.status == 'not_boarded' %}bg-red-50 border border-red-200{% else %}bg-gray-50 border border-gray-200{% endif %} rounded-md">
                     <div>
                         <span>{{ student.student.name }}</span>
-                        {% if student.boarding_time %}
-                        <br><span class="text-sm text-gray-600">Boarded at {{ student.boarding_time|date:"g:i A" }} IST</span>
+                        {% if student.morning_scan %}
+                        <br><span class="text-sm text-green-600">Boarded Morning</span>
+                        {% else %}
+                        <br><span class="text-sm text-red-600">Not Boarded Morning</span>
+                        {% endif %}
+                        {% if student.morning_latitude and student.morning_longitude %}
+                        <br><span class="text-xs text-gray-600">Location: {{ student.morning_latitude }}, {{ student.morning_longitude }}</span>
+                        {% endif %}
+                        {% if student.evening_scan %}
+                        <br><span class="text-sm text-green-600">Boarded Evening</span>
+                        {% else %}
+                        <br><span class="text-sm text-red-600">Not Boarded Evening</span>
+                        {% endif %}
+                        {% if student.evening_latitude and student.evening_longitude %}
+                        <br><span class="text-xs text-gray-600">Location: {{ student.evening_latitude }}, {{ student.evening_longitude }}</span>
                         {% endif %}
                     </div>
                     <span class="{% if student.status == 'not_boarded' %}text-red-600{% else %}text-green-600{% endif %} font-medium">{{ student.status|title }}</span>
@@ -134,13 +147,33 @@
 
         // Driver Dashboard Functions
         function markStudentBoarded(studentId) {
+            // Get current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    sendMarkBoardedRequest(studentId, latitude, longitude);
+                }, function(error) {
+                    console.error('Error getting location:', error);
+                    alert('Error getting location. Please enable location services.');
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        function sendMarkBoardedRequest(studentId, latitude, longitude) {
             var url = "{% url 'driver:mark_student_boarded' 0 %}".replace('0', studentId);
             fetch(url, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': csrfToken,
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
+                body: new URLSearchParams({
+                    'latitude': latitude,
+                    'longitude': longitude
+                }),
             })
             .then(response => response.json())
             .then(data => {

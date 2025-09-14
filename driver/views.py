@@ -43,6 +43,7 @@ def dashboard(request):
     bus = driver.bus_id
     today = timezone.now().date()
     current_time = timezone.now().time()
+    ist_tz = pytz.timezone('Asia/Kolkata')
 
     # Get or create StudentBoarding for registered students
     registered_students = hosteler_reg.objects.filter(bus=bus.bus_no)
@@ -58,19 +59,39 @@ def dashboard(request):
     if bus.departure_time:
         alert_time = (timezone.datetime.combine(today, bus.departure_time) - timedelta(minutes=5)).time()
         if current_time >= alert_time:
-            unboarded = StudentBoarding.objects.filter(bus=bus, date=today, status='not_boarded', alert_sent=False)
-            for boarding in unboarded:
+            # Unboarded for morning session (no morning scan)
+            unboarded_morning = StudentBoarding.objects.filter(bus=bus, date=today, morning_scan=False, alert_sent=False)
+            for boarding in unboarded_morning:
                 BoardingAlert.objects.get_or_create(
                     student=boarding.student,
                     bus=bus,
-                    alert_type='not_boarded',
+                    alert_type='not_boarded_morning',
                     sent_to='teacher',
                     defaults={'sent_at': timezone.now()}
                 )
                 BoardingAlert.objects.get_or_create(
                     student=boarding.student,
                     bus=bus,
-                    alert_type='not_boarded',
+                    alert_type='not_boarded_morning',
+                    sent_to='driver',
+                    defaults={'sent_at': timezone.now()}
+                )
+                boarding.alert_sent = True
+                boarding.save()
+            # Unboarded for evening session (boarded morning but not evening)
+            unboarded_evening = StudentBoarding.objects.filter(bus=bus, date=today, morning_scan=True, evening_scan=False, alert_sent=False)
+            for boarding in unboarded_evening:
+                BoardingAlert.objects.get_or_create(
+                    student=boarding.student,
+                    bus=bus,
+                    alert_type='not_boarded_evening',
+                    sent_to='teacher',
+                    defaults={'sent_at': timezone.now()}
+                )
+                BoardingAlert.objects.get_or_create(
+                    student=boarding.student,
+                    bus=bus,
+                    alert_type='not_boarded_evening',
                     sent_to='driver',
                     defaults={'sent_at': timezone.now()}
                 )
@@ -79,7 +100,7 @@ def dashboard(request):
 
     # Get alerts for driver
     alerts = BoardingAlert.objects.filter(bus=bus, sent_to='driver', sent_at__date=today).order_by('-sent_at')
-    students = StudentBoarding.objects.filter(bus=bus, date=today, status='boarded')  # Show only students currently in the bus
+    students = StudentBoarding.objects.filter(bus=bus, date=today)  # Show all boarding records for today
     ist_tz = pytz.timezone('Asia/Kolkata')
     students_with_ist_time = []
     for student_boarding in students:
@@ -94,6 +115,12 @@ def dashboard(request):
             'student': student_boarding.student,
             'status': student_boarding.status,
             'boarding_time': boarding_time_ist,
+            'morning_scan': student_boarding.morning_scan,
+            'morning_latitude': student_boarding.morning_latitude,
+            'morning_longitude': student_boarding.morning_longitude,
+            'evening_scan': student_boarding.evening_scan,
+            'evening_latitude': student_boarding.evening_latitude,
+            'evening_longitude': student_boarding.evening_longitude,
         })
 
     hostelers = hosteler_reg.objects.filter(bus=bus.bus_no)  # Get registered hosteler students for the bus
@@ -117,7 +144,36 @@ def mark_student_boarded(request, student_id):
             driver = Busdriver.objects.get(id=request.session['id'])
             bus = driver.bus_id
             today = timezone.now().date()
+            ist_tz = pytz.timezone('Asia/Kolkata')
+            current_time_ist = timezone.now().astimezone(ist_tz).time()
+            latitude = request.POST.get('latitude')
+            longitude = request.POST.get('longitude')
+
+            # Define scanning time windows
+            morning_start = datetime.strptime('05:00:00', '%H:%M:%S').time()
+            morning_end = datetime.strptime('10:00:00', '%H:%M:%S').time()
+            evening_start = datetime.strptime('15:45:00', '%H:%M:%S').time()
+            evening_end = datetime.strptime('20:00:00', '%H:%M:%S').time()
+
+            # Check if current time is within allowed scanning windows
+            if morning_start <= current_time_ist <= morning_end:
+                is_morning_scan = True
+            elif evening_start <= current_time_ist <= evening_end:
+                is_morning_scan = False
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Boarding not allowed at this time'})
+
             boarding = StudentBoarding.objects.get(student_id=student_id, bus=bus, date=today)
+            if is_morning_scan:
+                boarding.morning_scan = True
+                if latitude and longitude:
+                    boarding.morning_latitude = latitude
+                    boarding.morning_longitude = longitude
+            else:
+                boarding.evening_scan = True
+                if latitude and longitude:
+                    boarding.evening_latitude = latitude
+                    boarding.evening_longitude = longitude
             boarding.status = 'boarded'
             boarding.time = timezone.now().time()
             boarding.save()

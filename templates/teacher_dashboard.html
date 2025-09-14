@@ -68,7 +68,7 @@
                         {% for alert in boarding_alerts %}
                         <div class="p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
                             <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-medium text-yellow-900">Student {{ alert.alert_type|title }}: {{ alert.student.name }}</h4>
+                                <h4 class="font-medium text-yellow-900">Student {{ alert.alert_type|replace:"not_boarded_morning","not boarded morning"|replace:"not_boarded_evening","not boarded evening"|title }}: {{ alert.student.name }}</h4>
                                 <span class="text-xs text-yellow-700">{{ alert.bus.bus_starting_point }}</span>
                             </div>
                             <p class="text-sm text-yellow-800">Alert sent at {{ alert.sent_at|date:"H:i:s" }}</p>
