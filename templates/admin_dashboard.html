@@ -67,6 +67,25 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Bus Change Messages -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h3 class="text-xl font-semibold mb-4">📢 Bus Change Messages</h3>
+                <div id="busMessages" class="space-y-4">
+                    {% for msg in bus_messages %}
+                    <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-medium text-blue-800">{{ msg.subject }}</h4>
+                            <span class="text-xs text-blue-600">{{ msg.sent_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                        <p class="text-sm text-blue-700 mb-2">{{ msg.message }}</p>
+                        <p class="text-xs text-gray-600">From: {{ msg.driver.bus_driver }} (Bus #{{ msg.driver.bus_id.bus_no }})</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-500">No bus change messages.</p>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 

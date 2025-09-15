@@ -75,10 +75,15 @@ def dashboard(request):
     # Sort complaints by date descending (most recent first)
     complaints.sort(key=lambda x: x['date'], reverse=True)
 
+    # Get bus messages for school admin
+    from driver.models import BusMessage
+    bus_messages = BusMessage.objects.filter(audience='school_admin').order_by('-sent_at')
+
     context = {
         'users': users,
         'complaints': complaints,
-        'admin_name': request.session.get('admin_user_name')
+        'admin_name': request.session.get('admin_user_name'),
+        'bus_messages': bus_messages,
     }
     return render(request, 'admin_dashboard.html', context)
 

@@ -132,12 +132,16 @@ def dashboard(request):
 
     hostelers = hosteler_reg.objects.filter(bus=bus.bus_no)  # Get registered hosteler students for the bus
 
+    # Get bus messages sent by this driver
+    bus_messages = BusMessage.objects.filter(driver=driver).order_by('-sent_at')
+
     context = {
         'driver': driver,
         'bus': bus,
         'alerts': alerts,
         'students': students_with_ist_time,
         'hostelers': hostelers,
+        'bus_messages': bus_messages,
     }
     return render(request, 'driver_dashboard.html', context)
 
@@ -171,6 +175,13 @@ def mark_student_boarded(request, student_id):
                 return JsonResponse({'status': 'error', 'message': 'Boarding not allowed at this time'})
 
             boarding = StudentBoarding.objects.get(student_id=student_id, bus=bus, date=today)
+
+            # Check if student has already scanned for this session
+            if is_morning_scan and boarding.morning_scan:
+                return JsonResponse({'status': 'error', 'message': 'You have already scanned for morning session today'})
+            elif not is_morning_scan and boarding.evening_scan:
+                return JsonResponse({'status': 'error', 'message': 'You have already scanned for evening session today'})
+
             if is_morning_scan:
                 boarding.morning_scan = True
                 if latitude and longitude:
@@ -191,7 +202,14 @@ def mark_student_boarded(request, student_id):
                 alert_type='boarded',
                 sent_to='teacher'
             )
-            return JsonResponse({'status': 'success'})
+            # Send alert to driver
+            BoardingAlert.objects.create(
+                student=boarding.student,
+                bus=bus,
+                alert_type='boarded',
+                sent_to='driver'
+            )
+            return JsonResponse({'status': 'success', 'message': f'Successfully boarded for {"morning" if is_morning_scan else "evening"} session'})
         except StudentBoarding.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Student not found'})
     return JsonResponse({'status': 'error'})

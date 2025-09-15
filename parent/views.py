@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.db import models
 from .models import parent, Complaint, PasswordResetToken
 from student.models import student_details
 from driver.models import Bus
@@ -16,12 +17,13 @@ def dashboard(request):
     if 'parent_user_id' not in request.session:
         return redirect('parent:login')
     parent_id = request.session['parent_user_id']
+    parent_obj = parent.objects.get(id=parent_id)
     students = student_details.objects.filter(parent_id=parent_id)
     complaints = Complaint.objects.filter(parent_id=parent_id).order_by('-created_at')[:10]  # Recent 10 complaints
     buses = Bus.objects.all()
 
     # Get boarding status for each student
-    from driver.models import StudentBoarding
+    from driver.models import StudentBoarding, BusMessage
     from django.utils import timezone
     today = timezone.now().date()
     ist_tz = pytz.timezone('Asia/Kolkata')
@@ -44,10 +46,17 @@ def dashboard(request):
             'boarding_time': boarding_time,
         })
 
+    # Get bus messages for parents
+    bus_messages = BusMessage.objects.filter(
+        models.Q(audience='all_parents') |
+        (models.Q(audience='specific_parent') & (models.Q(parent_contact=parent_obj.email) | models.Q(parent_contact=parent_obj.phone_no)))
+    ).order_by('-sent_at')
+
     context = {
         'student_status': student_status,
         'complaints': complaints,
         'buses': buses,
+        'bus_messages': bus_messages,
     }
     return render(request, 'parent_dashboard.html', context)
 
