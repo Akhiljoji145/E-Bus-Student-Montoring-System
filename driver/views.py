@@ -100,6 +100,13 @@ def dashboard(request):
 
     # Get alerts for driver
     alerts = BoardingAlert.objects.filter(bus=bus, sent_to='driver', sent_at__date=today).order_by('-sent_at')
+    for alert in alerts:
+        if 'morning' in alert.alert_type:
+            alert.display_type = 'morning'
+        elif 'evening' in alert.alert_type:
+            alert.display_type = 'evening'
+        else:
+            alert.display_type = alert.alert_type
     students = StudentBoarding.objects.filter(bus=bus, date=today)  # Show all boarding records for today
     ist_tz = pytz.timezone('Asia/Kolkata')
     students_with_ist_time = []

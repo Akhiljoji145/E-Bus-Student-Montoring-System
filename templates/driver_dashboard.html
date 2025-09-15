@@ -50,7 +50,7 @@
                                 <h4 class="font-medium text-yellow-800">Student Not Boarded: {{ alert.student.name }}</h4>
                                 <span class="text-xs text-yellow-600">{{ alert.student.pickup_point }}</span>
                             </div>
-                            <p class="text-sm text-yellow-700">Expected to board. Not scanned for {{ alert.alert_type|replace:"not_boarded_morning","morning"|replace:"not_boarded_evening","evening" }} session.</p>
+                            <p class="text-sm text-yellow-700">Expected to board. Not scanned for {{ alert.display_type }} session.</p>
                             <p class="text-xs text-gray-600">Action: Check surroundings, contact school if necessary.</p>
                             <button onclick="markStudentBoarded({{ alert.student.id }})" class="mt-2 text-xs bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700">Mark Boarded (Manual)</button>
                         </div>
