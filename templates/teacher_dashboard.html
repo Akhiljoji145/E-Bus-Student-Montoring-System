@@ -1,4 +1,4 @@
-{% load static %}
+{% load static tz %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,7 +81,7 @@
 </h4>
                                 <span class="text-xs text-yellow-700">{{ alert.bus.bus_starting_point }}</span>
                             </div>
-                            <p class="text-sm text-yellow-800">Alert sent at {{ alert.sent_at|date:"H:i:s" }}</p>
+                            <p class="text-sm text-yellow-800">Alert sent at {{ alert.sent_at|timezone:"Asia/Kolkata"|date:"H:i:s" }}</p>
                         </div>
                         {% empty %}
                         <p class="text-gray-500 text-center py-4">No boarding alerts today</p>

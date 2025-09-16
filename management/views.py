@@ -197,6 +197,9 @@ def add_student(request):
         if not password:
             password = generate_random_password()
 
+        # Store plain password for email
+        plain_password = password
+
         # Hash the password before saving
         hashed_password = make_password(password)
 
@@ -211,6 +214,25 @@ def add_student(request):
             bus=bus
         )
         student.save()
+
+        # Send welcome email to the student
+        try:
+            html_message = render_to_string('student_welcome_email.html', {
+                'student_name': name,
+                'student_email': email,
+                'student_password': plain_password
+            })
+            send_mail(
+                'Welcome to BusTracker Pro - Your Account Details',
+                'Please use an HTML-compatible email client to view this message.',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log the error but don't fail the student addition
+            print(f"Error sending welcome email to {email}: {e}")
 
         response_data = {
             'status': 'success',
@@ -242,6 +264,9 @@ def add_driver(request):
             except Bus.DoesNotExist:
                 return JsonResponse({'status': 'error', 'message': 'Bus not found'})
 
+        # Store plain password for email
+        plain_password = password
+
         driver = Busdriver(
             bus_driver=bus_driver,
             email=email,
@@ -252,6 +277,26 @@ def add_driver(request):
             bus_photo=bus_photo
         )
         driver.save()
+
+        # Send welcome email to the driver
+        try:
+            html_message = render_to_string('driver_welcome_email.html', {
+                'driver_name': bus_driver,
+                'driver_email': email,
+                'driver_password': plain_password
+            })
+            send_mail(
+                'Welcome to BusTracker Pro - Your Account Details',
+                'Please use an HTML-compatible email client to view this message.',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log the error but don't fail the driver addition
+            print(f"Error sending welcome email to {email}: {e}")
+
         return JsonResponse({'status': 'success', 'message': 'Driver added successfully'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
@@ -266,6 +311,9 @@ def add_management_personnel(request):
         if management.objects.filter(email=email).exists():
             return JsonResponse({'status': 'error', 'message': 'Email already exists'})
 
+        # Store plain password for email
+        plain_password = password
+
         mgmt_personnel = management(
             name=name,
             email=email,
@@ -273,6 +321,26 @@ def add_management_personnel(request):
             phone_no=phone_no
         )
         mgmt_personnel.save()
+
+        # Send welcome email to the management personnel
+        try:
+            html_message = render_to_string('management_welcome_email.html', {
+                'management_name': name,
+                'management_email': email,
+                'management_password': plain_password
+            })
+            send_mail(
+                'Welcome to BusTracker Pro - Your Account Details',
+                'Please use an HTML-compatible email client to view this message.',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log the error but don't fail the management personnel addition
+            print(f"Error sending welcome email to {email}: {e}")
+
         return JsonResponse({'status': 'success', 'message': 'Management personnel added successfully'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
@@ -291,15 +359,38 @@ def add_teacher(request):
         if teacher.objects.filter(email=email).exists():
             return JsonResponse({'status': 'error', 'message': 'Email already exists'})
 
+        # Store plain password for email
+        plain_password = password
+
         new_teacher = teacher(
             teacher_name=teacher_name,
             email=email,
-            password=password,
+            password=make_password(password),
             class_no=class_no,
             branch=branch,
             sem=sem
         )
         new_teacher.save()
+
+        # Send welcome email to the teacher
+        try:
+            html_message = render_to_string('teacher_welcome_email.html', {
+                'teacher_name': teacher_name,
+                'teacher_email': email,
+                'teacher_password': plain_password
+            })
+            send_mail(
+                'Welcome to BusTracker Pro - Your Account Details',
+                'Please use an HTML-compatible email client to view this message.',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log the error but don't fail the teacher addition
+            print(f"Error sending welcome email to {email}: {e}")
+
         return JsonResponse({'status': 'success', 'message': 'Teacher added successfully'})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 

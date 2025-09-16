@@ -65,7 +65,7 @@ class Command(BaseCommand):
                 defaults={
                     'teacher_name': 'Test Teacher',
                     'password': make_password('password123'),
-                    'class_no': 10,
+                    'class_no': '10',
                     'branch': 'Science',
                     'sem': '1'
                 }

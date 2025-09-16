@@ -195,7 +195,7 @@ def handle_boarding(request, bus_id):
             # Define scanning time windows
             morning_start = datetime.strptime('05:00:00', '%H:%M:%S').time()
             morning_end = datetime.strptime('10:00:00', '%H:%M:%S').time()
-            evening_start = datetime.strptime('15:45:00', '%H:%M:%S').time()
+            evening_start = datetime.strptime('15:00:00', '%H:%M:%S').time()
             evening_end = datetime.strptime('20:00:00', '%H:%M:%S').time()
 
             # Check if current time is within allowed scanning windows

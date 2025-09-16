@@ -99,14 +99,31 @@ def dashboard(request):
                 boarding.save()
 
     # Get alerts for driver
-    alerts = BoardingAlert.objects.filter(bus=bus, sent_to='driver', sent_at__date=today).order_by('-sent_at')
-    for alert in alerts:
+    unboarded_alerts = BoardingAlert.objects.filter(bus=bus, sent_to='driver', alert_type__in=['not_boarded_morning', 'not_boarded_evening'], sent_at__date=today).order_by('-sent_at')
+    for alert in unboarded_alerts:
         if 'morning' in alert.alert_type:
             alert.display_type = 'morning'
         elif 'evening' in alert.alert_type:
             alert.display_type = 'evening'
         else:
             alert.display_type = alert.alert_type
+
+    # Get boarding alerts from StudentBoarding model
+    boarding_records = StudentBoarding.objects.filter(bus=bus, date=today, status='boarded').order_by('-time')
+    boarding_alerts = []
+    for record in boarding_records:
+        if record.morning_scan and not record.evening_scan:
+            display_type = 'morning'
+        elif record.evening_scan:
+            display_type = 'evening'
+        else:
+            display_type = 'unknown'
+        boarding_alerts.append({
+            'student': record.student,
+            'display_type': display_type,
+            'sent_at': record.time,
+            'date': record.date
+        })
     students = StudentBoarding.objects.filter(bus=bus, date=today)  # Show all boarding records for today
     ist_tz = pytz.timezone('Asia/Kolkata')
     students_with_ist_time = []
@@ -138,7 +155,8 @@ def dashboard(request):
     context = {
         'driver': driver,
         'bus': bus,
-        'alerts': alerts,
+        'unboarded_alerts': unboarded_alerts,
+        'boarding_alerts': boarding_alerts,
         'students': students_with_ist_time,
         'hostelers': hostelers,
         'bus_messages': bus_messages,
@@ -163,7 +181,7 @@ def mark_student_boarded(request, student_id):
             # Define scanning time windows
             morning_start = datetime.strptime('05:00:00', '%H:%M:%S').time()
             morning_end = datetime.strptime('10:00:00', '%H:%M:%S').time()
-            evening_start = datetime.strptime('15:45:00', '%H:%M:%S').time()
+            evening_start = datetime.strptime('15:00:00', '%H:%M:%S').time()
             evening_end = datetime.strptime('20:00:00', '%H:%M:%S').time()
 
             # Check if current time is within allowed scanning windows

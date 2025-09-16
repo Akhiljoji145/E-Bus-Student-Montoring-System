@@ -10,7 +10,7 @@ class teacher(models.Model):
     teacher_name=models.CharField(max_length=50)
     email=models.EmailField(max_length=254)
     password=models.CharField(max_length=128,blank=True)
-    class_no=models.IntegerField()
+    class_no=models.CharField(max_length=10)
     branch=models.CharField(max_length=50)
     sem=models.CharField(max_length=50)
 

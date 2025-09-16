@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 import secrets
 import string
+import pytz
 from .models import teacher, MissingStudentAlert, StudentStatusOverride, PasswordResetToken
 from student.models import student_details
 from driver.models import Busdriver, Bus, BoardingAlert
@@ -42,6 +43,13 @@ def dashboard(request):
 
     # Get boarding alerts for teacher
     boarding_alerts = BoardingAlert.objects.filter(sent_to='teacher', sent_at__date=timezone.now().date()).order_by('-sent_at')[:10]
+
+    # Convert times to IST
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    for alert in alerts:
+        alert.reported_at = alert.reported_at.astimezone(ist_tz)
+    for alert in boarding_alerts:
+        alert.sent_at = alert.sent_at.astimezone(ist_tz)
 
     # Get all students for dropdowns
     students = student_details.objects.all().order_by('name')
@@ -157,14 +165,16 @@ def get_alerts(request):
     alerts = MissingStudentAlert.objects.filter(status='active').order_by('-reported_at')[:20]
     alerts_data = []
 
+    ist_tz = pytz.timezone('Asia/Kolkata')
     for alert in alerts:
+        reported_at_ist = alert.reported_at.astimezone(ist_tz)
         alerts_data.append({
             'id': alert.id,
             'student_name': alert.student_name,
             'bus_route': alert.bus_route,
             'last_seen': alert.last_seen,
             'parent_contact': alert.parent_contact,
-            'reported_at': alert.reported_at.strftime('%Y-%m-%d %H:%M:%S')
+            'reported_at': reported_at_ist.strftime('%Y-%m-%d %H:%M:%S')
         })
 
     return JsonResponse({
@@ -179,13 +189,15 @@ def get_boarding_alerts(request):
     alerts = BoardingAlert.objects.filter(sent_to='teacher', sent_at__date=timezone.now().date()).order_by('-sent_at')[:20]
     alerts_data = []
 
+    ist_tz = pytz.timezone('Asia/Kolkata')
     for alert in alerts:
+        sent_at_ist = alert.sent_at.astimezone(ist_tz)
         alerts_data.append({
             'id': alert.id,
             'student_name': alert.student.name,
             'bus_route': alert.bus.bus_starting_point,
             'alert_type': alert.alert_type,
-            'sent_at': alert.sent_at.strftime('%Y-%m-%d %H:%M:%S')
+            'sent_at': sent_at_ist.strftime('%Y-%m-%d %H:%M:%S')
         })
 
     return JsonResponse({
