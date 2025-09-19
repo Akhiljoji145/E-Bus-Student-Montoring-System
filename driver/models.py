@@ -41,19 +41,13 @@ class StudentBoarding(models.Model):
     evening_longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     status = models.CharField(max_length=20, choices=[('boarded', 'Boarded'), ('not_boarded', 'Not Boarded'), ('departed', 'Departed')], default='not_boarded')
     alert_sent = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = [['student', 'bus', 'date']]
+
     def __str__(self):
         return f"{self.student.name} - {self.status} - Morning Scan: {self.morning_scan} - Evening Scan: {self.evening_scan}"
 
-class BoardingAlert(models.Model):
-    student = models.ForeignKey('student.student_details', on_delete=models.CASCADE)
-    bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
-    alert_type = models.CharField(max_length=30, choices=[('boarded', 'Boarded'), ('not_boarded', 'Not Boarded'), ('unregistered', 'Unregistered'), ('not_boarded_morning', 'Not Boarded Morning'), ('not_boarded_evening', 'Not Boarded Evening')])
-    sent_to = models.CharField(max_length=20, choices=[('teacher', 'Teacher'), ('driver', 'Driver')])
-    sent_at = models.DateTimeField(default=timezone.now)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    def __str__(self):
-        return f"Alert for {self.student.name} - {self.alert_type} to {self.sent_to}"
 
 class BusMessage(models.Model):
     driver = models.ForeignKey(Busdriver, on_delete=models.CASCADE)

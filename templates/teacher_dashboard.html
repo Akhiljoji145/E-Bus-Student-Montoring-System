@@ -52,7 +52,7 @@
                             </div>
                             <p class="text-sm text-red-800">{{ alert.last_seen }}</p>
                             <p class="text-xs text-gray-700">Parent Contact: {{ alert.parent_contact }}</p>
-                            <p class="text-xs text-gray-600">Reported: {{ alert.reported_at|date:"Y-m-d H:i:s" }}</p>
+                            <p class="text-xs text-gray-600">Reported: {{ alert.formatted_reported_at }}</p>
                             <button onclick="resolveMissingAlert({{ alert.id }}, '{{ alert.student_name }}')" class="mt-2 text-xs bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800">Resolve Alert</button>
                         </div>
                         {% empty %}
@@ -64,24 +64,27 @@
                 <!-- Boarding Alerts -->
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h3 class="text-xl font-semibold mb-4">🚌 Boarding Alerts</h3>
+                    <p class="text-xs text-gray-500 mb-4">Note: Students with no morning or evening scans are considered not boarded morning and shown here.</p>
                     <div id="boardingAlerts" class="space-y-4">
                         {% for alert in boarding_alerts %}
-                        <div class="p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
+                        <div class="p-4 bg-red-100 border border-red-300 rounded-lg">
                             <div class="flex justify-between items-start mb-2">
-<h4 class="font-medium text-yellow-900">
-    Student 
-    {% if alert.alert_type == "not_boarded_morning" %}
-        Not Boarded Morning
-    {% elif alert.alert_type == "not_boarded_evening" %}
-        Not Boarded Evening
-    {% else %}
-        {{ alert.alert_type|title }}
-    {% endif %}
-    : {{ alert.student.name }}
-</h4>
-                                <span class="text-xs text-yellow-700">{{ alert.bus.bus_starting_point }}</span>
+                                <h4 class="font-medium text-red-900">
+                                    Student
+                                    {% if alert.alert_type == "not_boarded_morning" %}
+                                    Not Boarded Morning
+                                    {% elif alert.alert_type == "not_boarded_evening" %}
+                                    Boarded Morning, Not Boarded Evening
+                                    {% elif alert.alert_type == "not_boarded" %}
+                                    Not Boarded Morning
+                                    {% else %}
+                                    {{ alert.alert_type|title }}
+                                    {% endif %}
+                                    : {{ alert.student.name }}
+                                </h4>
+                                <span class="text-xs text-red-700">{{ alert.bus.bus_starting_point }}</span>
                             </div>
-                            <p class="text-sm text-yellow-800">Alert sent at {{ alert.sent_at|timezone:"Asia/Kolkata"|date:"H:i:s" }}</p>
+                            <p class="text-sm text-red-800">Alert sent at {{ alert.formatted_sent_at }}</p>
                         </div>
                         {% empty %}
                         <p class="text-gray-500 text-center py-4">No boarding alerts today</p>

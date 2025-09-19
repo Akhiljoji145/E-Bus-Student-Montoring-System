@@ -11,9 +11,10 @@ from django.core.mail import send_mail
 import secrets
 import string
 import pytz
+from datetime import time
 from .models import teacher, MissingStudentAlert, StudentStatusOverride, PasswordResetToken
 from student.models import student_details
-from driver.models import Busdriver, Bus, BoardingAlert
+from driver.models import Busdriver, Bus, StudentBoarding
 
 # Create your views here.
 def login(request):
@@ -38,18 +39,31 @@ def dashboard(request):
     if 'teacher_id' not in request.session:
         return redirect('teacher:login')
 
+    teacher_id = request.session['teacher_id']
+    teacher_obj = teacher.objects.get(id=teacher_id)
+
     # Get active missing student alerts
     alerts = MissingStudentAlert.objects.filter(status='active').order_by('-reported_at')[:10]
 
-    # Get boarding alerts for teacher
-    boarding_alerts = BoardingAlert.objects.filter(sent_to='teacher', sent_at__date=timezone.now().date()).order_by('-sent_at')[:10]
+    # Get boarding alerts for teacher - students not boarded today, only for teacher's class
+    today = timezone.now().date()
+    boarding_alerts = StudentBoarding.objects.filter(date=today, student__stud_class=teacher_obj.class_no).exclude(status='departed').order_by('student__name')
 
     # Convert times to IST
     ist_tz = pytz.timezone('Asia/Kolkata')
     for alert in alerts:
         alert.reported_at = alert.reported_at.astimezone(ist_tz)
+        alert.formatted_reported_at = alert.reported_at.strftime('%Y-%m-%d %I:%M:%S %p')
     for alert in boarding_alerts:
-        alert.sent_at = alert.sent_at.astimezone(ist_tz)
+        if not alert.morning_scan and not alert.evening_scan:
+            alert.alert_type = 'not_boarded'
+        elif alert.morning_scan and not alert.evening_scan:
+            alert.alert_type = 'not_boarded_evening'
+        elif not alert.morning_scan and alert.evening_scan:
+            alert.alert_type = 'not_boarded_morning'
+        else:
+            alert.alert_type = 'boarded'
+        alert.formatted_sent_at = timezone.now().astimezone(ist_tz).strftime('%Y-%m-%d %I:%M:%S %p')
 
     # Get all students for dropdowns
     students = student_details.objects.all().order_by('name')
@@ -174,7 +188,7 @@ def get_alerts(request):
             'bus_route': alert.bus_route,
             'last_seen': alert.last_seen,
             'parent_contact': alert.parent_contact,
-            'reported_at': reported_at_ist.strftime('%Y-%m-%d %H:%M:%S')
+            'reported_at': reported_at_ist.strftime('%Y-%m-%d %I:%M:%S %p')
         })
 
     return JsonResponse({
@@ -186,18 +200,28 @@ def get_boarding_alerts(request):
     if 'teacher_id' not in request.session:
         return JsonResponse({'status': 'error', 'message': 'Not authenticated'})
 
-    alerts = BoardingAlert.objects.filter(sent_to='teacher', sent_at__date=timezone.now().date()).order_by('-sent_at')[:20]
+    teacher_id = request.session['teacher_id']
+    teacher_obj = teacher.objects.get(id=teacher_id)
+
+    today = timezone.now().date()
+    alerts = StudentBoarding.objects.filter(date=today, student__stud_class=teacher_obj.class_no).exclude(status='departed').order_by('student__name')[:20]
     alerts_data = []
 
     ist_tz = pytz.timezone('Asia/Kolkata')
     for alert in alerts:
-        sent_at_ist = alert.sent_at.astimezone(ist_tz)
+        if not alert.morning_scan:
+            alert_type = 'not_boarded_morning'
+        elif alert.morning_scan and not alert.evening_scan:
+            alert_type = 'not_boarded_evening'
+        else:
+            alert_type = 'not_boarded'
+        sent_at_ist = timezone.now().astimezone(ist_tz).strftime('%Y-%m-%d %I:%M:%S %p')
         alerts_data.append({
             'id': alert.id,
             'student_name': alert.student.name,
             'bus_route': alert.bus.bus_starting_point,
-            'alert_type': alert.alert_type,
-            'sent_at': sent_at_ist.strftime('%Y-%m-%d %H:%M:%S')
+            'alert_type': alert_type,
+            'sent_at': sent_at_ist
         })
 
     return JsonResponse({
@@ -220,7 +244,7 @@ def get_all_bus_locations(request):
                 'bus_no': driver.bus_id.bus_no if driver.bus_id else 'N/A',
                 'latitude': str(driver.latitude),
                 'longitude': str(driver.longitude),
-                'last_updated': driver.last_updated.strftime('%Y-%m-%d %H:%M:%S') if driver.last_updated else 'Never'
+                'last_updated': driver.last_updated.strftime('%Y-%m-%d %I:%M:%S %p') if driver.last_updated else 'Never'
             })
 
     return JsonResponse({

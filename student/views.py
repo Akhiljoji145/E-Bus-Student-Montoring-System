@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import student_details, student_complaints, hosteler_reg, PasswordResetToken
-from driver.models import Bus, Busdriver, StudentBoarding, BoardingAlert
+from driver.models import Bus, Busdriver, StudentBoarding
 from teacher.models import teacher
 from django.core.mail import send_mail
 from django.conf import settings
@@ -194,7 +194,7 @@ def handle_boarding(request, bus_id):
 
             # Define scanning time windows
             morning_start = datetime.strptime('05:00:00', '%H:%M:%S').time()
-            morning_end = datetime.strptime('10:00:00', '%H:%M:%S').time()
+            morning_end = datetime.strptime('12:00:00', '%H:%M:%S').time()
             evening_start = datetime.strptime('15:00:00', '%H:%M:%S').time()
             evening_end = datetime.strptime('20:00:00', '%H:%M:%S').time()
 
@@ -233,31 +233,13 @@ def handle_boarding(request, bus_id):
 
                 message = f'You are boarded successfully for {"morning" if is_morning_scan else "evening"} session'
 
-                # Send alert to teacher
-                BoardingAlert.objects.create(
-                    student=student,
-                    bus=bus,
-                    alert_type='boarded',
-                    sent_to='teacher'
-                )
                 # Send alert to teachers related to student's class and branch
                 related_teachers = teacher.objects.filter(class_no=student.stud_class, branch=student.branch)
                 for t in related_teachers:
-                    BoardingAlert.objects.create(
-                        student=student,
-                        bus=bus,
-                        alert_type='boarded',
-                        sent_to='teacher'
-                    )
+                    pass  # Placeholder for future alert logic if needed
                 return JsonResponse({'status': 'success', 'message': message})
             else:
-                # Student not registered for this bus, alert driver
-                BoardingAlert.objects.create(
-                    student=student,
-                    bus=bus,
-                    alert_type='unregistered',
-                    sent_to='driver'
-                )
+                # Student not registered for this bus
                 return JsonResponse({'status': 'error', 'message': 'Student not registered for this bus'})
         except student_details.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Student not found'})

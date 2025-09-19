@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
-from .models import Busdriver, Bus, StudentBoarding, BoardingAlert, BusMessage
+from .models import Busdriver, Bus, StudentBoarding, BusMessage
 from student.models import hosteler_reg, student_details
 from django.contrib.sessions.models import Session
 from django.http import JsonResponse
@@ -55,58 +55,21 @@ def dashboard(request):
             defaults={'status': 'not_boarded'}
         )
 
-    # Check for alerts 5 mins before departure
-    if bus.departure_time:
-        alert_time = (timezone.datetime.combine(today, bus.departure_time) - timedelta(minutes=5)).time()
-        if current_time >= alert_time:
-            # Unboarded for morning session (no morning scan)
-            unboarded_morning = StudentBoarding.objects.filter(bus=bus, date=today, morning_scan=False, alert_sent=False)
-            for boarding in unboarded_morning:
-                BoardingAlert.objects.get_or_create(
-                    student=boarding.student,
-                    bus=bus,
-                    alert_type='not_boarded_morning',
-                    sent_to='teacher',
-                    defaults={'sent_at': timezone.now()}
-                )
-                BoardingAlert.objects.get_or_create(
-                    student=boarding.student,
-                    bus=bus,
-                    alert_type='not_boarded_morning',
-                    sent_to='driver',
-                    defaults={'sent_at': timezone.now()}
-                )
-                boarding.alert_sent = True
-                boarding.save()
-            # Unboarded for evening session (boarded morning but not evening)
-            unboarded_evening = StudentBoarding.objects.filter(bus=bus, date=today, morning_scan=True, evening_scan=False, alert_sent=False)
-            for boarding in unboarded_evening:
-                BoardingAlert.objects.get_or_create(
-                    student=boarding.student,
-                    bus=bus,
-                    alert_type='not_boarded_evening',
-                    sent_to='teacher',
-                    defaults={'sent_at': timezone.now()}
-                )
-                BoardingAlert.objects.get_or_create(
-                    student=boarding.student,
-                    bus=bus,
-                    alert_type='not_boarded_evening',
-                    sent_to='driver',
-                    defaults={'sent_at': timezone.now()}
-                )
-                boarding.alert_sent = True
-                boarding.save()
-
-    # Get alerts for driver
-    unboarded_alerts = BoardingAlert.objects.filter(bus=bus, sent_to='driver', alert_type__in=['not_boarded_morning', 'not_boarded_evening'], sent_at__date=today).order_by('-sent_at')
+    # Get alerts for driver - unboarded students
+    unboarded_alerts = StudentBoarding.objects.filter(bus=bus, date=today, status='not_boarded').order_by('student__name')
+    filtered_alerts = []
     for alert in unboarded_alerts:
-        if 'morning' in alert.alert_type:
+        # Exclude students who have neither morning nor evening scan (considered absent)
+        if not alert.morning_scan and not alert.evening_scan:
+            continue
+        if not alert.morning_scan:
             alert.display_type = 'morning'
-        elif 'evening' in alert.alert_type:
+        elif alert.morning_scan and not alert.evening_scan:
             alert.display_type = 'evening'
         else:
-            alert.display_type = alert.alert_type
+            alert.display_type = 'unknown'
+        filtered_alerts.append(alert)
+    unboarded_alerts = filtered_alerts
 
     # Get boarding alerts from StudentBoarding model
     boarding_records = StudentBoarding.objects.filter(bus=bus, date=today, status='boarded').order_by('-time')
@@ -180,7 +143,7 @@ def mark_student_boarded(request, student_id):
 
             # Define scanning time windows
             morning_start = datetime.strptime('05:00:00', '%H:%M:%S').time()
-            morning_end = datetime.strptime('10:00:00', '%H:%M:%S').time()
+            morning_end = datetime.strptime('12:00:00', '%H:%M:%S').time()
             evening_start = datetime.strptime('15:00:00', '%H:%M:%S').time()
             evening_end = datetime.strptime('20:00:00', '%H:%M:%S').time()
 
@@ -213,20 +176,7 @@ def mark_student_boarded(request, student_id):
             boarding.status = 'boarded'
             boarding.time = timezone.now().time()
             boarding.save()
-            # Send alert to teacher
-            BoardingAlert.objects.create(
-                student=boarding.student,
-                bus=bus,
-                alert_type='boarded',
-                sent_to='teacher'
-            )
-            # Send alert to driver
-            BoardingAlert.objects.create(
-                student=boarding.student,
-                bus=bus,
-                alert_type='boarded',
-                sent_to='driver'
-            )
+            alert_type = 'boarded_morning' if is_morning_scan else 'boarded_evening'
             return JsonResponse({'status': 'success', 'message': f'Successfully boarded for {"morning" if is_morning_scan else "evening"} session'})
         except StudentBoarding.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Student not found'})
@@ -262,23 +212,7 @@ def validate_departure(request):
             return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'})
 
-def unregistered_alert(request):
-    if 'id' not in request.session:
-        return redirect('driver:login')
-    driver_id = request.session['id']
-    driver = Busdriver.objects.get(id=driver_id)
-    bus = driver.bus_id
-    today = timezone.now().date()
 
-    # Get unregistered alerts for the driver
-    alerts = BoardingAlert.objects.filter(bus=bus, sent_to='driver', alert_type='unregistered', sent_at__date=today).order_by('-sent_at')
-
-    context = {
-        'driver': driver,
-        'bus': bus,
-        'alerts': alerts,
-    }
-    return render(request, 'driver_alert.html', context)
 
 def generate_qr_code(request, bus_id):
     if 'id' not in request.session:
