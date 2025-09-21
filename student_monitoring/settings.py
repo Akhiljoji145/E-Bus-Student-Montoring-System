@@ -44,8 +44,6 @@ INSTALLED_APPS = [
     'driver',
     'parent',
     'student',
-    'tailwind',
-    'theme',
 ]
 
 MIDDLEWARE = [
@@ -146,8 +144,3 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'akhiljojim@gmail.com'
 EMAIL_HOST_PASSWORD = 'gxpm ydbz plam uhqb'
 DEFAULT_FROM_EMAIL = 'akhiljojim@gmail.com'
-
-# Google Maps API Key
-GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY_HERE'
-
-

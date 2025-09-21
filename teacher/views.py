@@ -47,7 +47,8 @@ def dashboard(request):
 
     # Get boarding alerts for teacher - students not boarded today, only for teacher's class
     today = timezone.now().date()
-    boarding_alerts = StudentBoarding.objects.filter(date=today, student__stud_class=teacher_obj.class_no).exclude(status='departed').order_by('student__name')
+    boarding_alerts = StudentBoarding.objects.filter(date=today, student__stud_class=teacher_obj.class_no, student__branch=teacher_obj.branch).exclude(status='departed').order_by('student__name')
+
 
     # Convert times to IST
     ist_tz = pytz.timezone('Asia/Kolkata')
@@ -204,8 +205,9 @@ def get_boarding_alerts(request):
     teacher_obj = teacher.objects.get(id=teacher_id)
 
     today = timezone.now().date()
-    alerts = StudentBoarding.objects.filter(date=today, student__stud_class=teacher_obj.class_no).exclude(status='departed').order_by('student__name')[:20]
+    alerts = StudentBoarding.objects.filter(date=today, student__stud_class=teacher_obj.class_no, student__branch=teacher_obj.branch).exclude(status='departed').order_by('student__name')[:20]
     alerts_data = []
+
 
     ist_tz = pytz.timezone('Asia/Kolkata')
     for alert in alerts:
